@@ -12,5 +12,5 @@ class SubZeroError(MyError):
         """Checks if the value is greater than zero."""
         for value in values:
             if value <= 0:
-                return 0
-        return 1
+                return True
+        return False
