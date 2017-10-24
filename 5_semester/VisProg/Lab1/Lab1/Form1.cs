@@ -166,13 +166,12 @@ namespace Lab1
                 ListBoxTo.Items.Add(Item);
             }
             ListBoxTo.EndUpdate();
-            /*
-            for (int i = ListBoxTo.Items.Count - 1; i >= 0; i--)
+            
+            for (int i = ListBoxFrom.Items.Count - 1; i >= 0; i--)
             {
-                for (int j = ListBoxFrom.Items.Count - 1; i >= 0; i--)
-                    if (ListBoxTo.Items.Equals(ListBoxFrom)) ListBoxFrom.Items.RemoveAt(j);
+                if (ListBoxFrom.GetSelected(i)) ListBoxFrom.Items.RemoveAt(i);
             }
-            */
+            
         }
 
         private void ListBoxItemsMigrate(ListBox ListBoxFrom, ListBox ListBoxTo)
@@ -212,24 +211,36 @@ namespace Lab1
 
         private void ListBoxSort(ListBox listBox, ComboBox comboBox)
         {
-            /*
-            if (comboBox.SelectedIndex == 0)
-            {
-                listBox.Sorted = true;
+            var items = listBox1.Items.Cast<string>().OrderBy(item => item).ToList();
+
+            if (comboBox.Text == "Alphabet (DESC)") {
+                items = listBox1.Items.Cast<string>().OrderBy(item => item).ToList();
+                items.Reverse();
+
             }
-            */
-            listBox.Sorted = true;
+            else if (comboBox.Text == "Word lenght (ASC)") {
+                items = listBox1.Items.Cast<string>().OrderBy(item => item.Length).ToList();
+            }
+            else if (comboBox.Text == "Word lenght (DESC)") {
+                items = listBox1.Items.Cast<string>().OrderBy(item => item.Length).ToList();
+                items.Reverse();
+            }
+
+
+            listBox1.BeginUpdate();
+            listBox1.Items.Clear();
+            foreach (var item in items)
+            {
+                listBox1.Items.Add(item);
+            }
+            listBox1.EndUpdate();
 
         }
 
         private void button5_Click(object sender, EventArgs e)
         {
+
             this.ListBoxSort(listBox1, comboBox1);
         }
     }
 }
-
-/*
- * Сортировки
- * Перенос элементов списка
- */
