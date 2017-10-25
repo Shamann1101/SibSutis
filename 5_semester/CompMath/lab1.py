@@ -39,6 +39,7 @@ def table_create(c=C, h=H):
     while i <= C + 30 * h:
         table[i] = func(i)
         i = round(i + h, 4)
+    table = take_nearest(table)
     return table
 
 
@@ -49,22 +50,37 @@ def find_nearest(table, x):
     :param x:
     :return:
     """
-    value = list()
-    next_elem = True
-    for elem in table.keys():
-        if elem >= x and next_elem == True:
-            value.insert(0, elem)
-            value.insert(1, table[elem])
-            value.insert(2, table[elem])
-            next_elem = False
-        elif elem >= x and next_elem == False:
-            value.pop(2)
-            value.insert(2, table[elem])
-            return value
-    return value
+    keys = list(table.keys())
+    for i in range(len(keys) - 1):
+        if x >= keys[i] and x <= keys[i + 1]:
+            return keys[i]
+    return keys[len(keys) - 1]
 
 
-def interpolation(x, nearest_pair, h=H):
+def take_nearest(table):
+    """
+    Adds the values of neighboring elements to the dictionary
+    :param table:
+    :return:
+    """
+    new_table = dict()
+    keys = list(table.keys())
+    values = list(table.values())
+    for i in range(len(table)):
+        if i == 0:
+            left = values[0]
+            right = values[i + 1]
+        elif i == len(table) - 1:
+            left = values[i - 1]
+            right = values[len(table) - 1]
+        else:
+            left = values[i - 1]
+            right = values[i + 1]
+        new_table[keys[i]] = [left, values[i], right]
+    return new_table
+
+
+def interpolation(x, x_left, y_left, y_right, h=H):
     """
     Linear interpolation
     :param x:
@@ -72,23 +88,25 @@ def interpolation(x, nearest_pair, h=H):
     :param h:
     :return:
     """
-    q = (x - nearest_pair[0]) / h
-    inter = nearest_pair[1] + q * (nearest_pair[2] - nearest_pair[1])
+    q = (x - x_left) / h
+    inter = y_left + q * (y_right - y_left)
     return round(inter, 4)
 
 
-def iter_table_create(h=H):
+def iter_table_create(table, h=H):
     """
     Creates a table of values of the interpolation
     :param h:
     :return:
     """
-    table = dict()
+    new_table = dict()
     for n in range(30):
         x = func_i(n)
-        table[x] = [interpolation(x, find_nearest(table_create(), x), h), func(x)]
-    return table
+        nearest = find_nearest(table, x)
+        new_table[x] = [interpolation(x, nearest, table[nearest][1], table[nearest][2]), func(x)]
+    return new_table
 
 
-print(table_create())
-print(iter_table_create())
+table = table_create()
+print(table)
+print(iter_table_create(table))
