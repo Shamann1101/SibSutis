@@ -1,7 +1,7 @@
 import math
 import my_error
 
-N = 2
+N = 4
 C = 0.01 * N
 ACCURACY = 0.0001
 
@@ -92,7 +92,7 @@ def set_matrix_diagonal_values(matrix, value=0):
         return new_matrix
 
 
-def matrix_addition(first_matrix, second_matrix, addition=1):
+def matrix_addition(first_matrix, second_matrix, addition=1, accuracy=4):
     """
     Addition of matrices is performed only when the matrices have the same dimension
     :param first_matrix: list
@@ -119,7 +119,7 @@ def matrix_addition(first_matrix, second_matrix, addition=1):
         for i in range(len(first_matrix)):
             new_matrix[i] = [0] * len(first_matrix[0])
             for j in range(len(second_matrix[0])):
-                new_matrix[i][j] = first_matrix[i][j] + addition * second_matrix[i][j]
+                new_matrix[i][j] = round(first_matrix[i][j] + addition * second_matrix[i][j], accuracy)
         return new_matrix
 
 
