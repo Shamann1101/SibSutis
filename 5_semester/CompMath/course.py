@@ -18,6 +18,9 @@ def ndigits(x=ACCURACY):
 
 
 def method_runge_kutta(x, y, h=H, accuracy=ACCURACY):
+    """
+    The solution of the differential equation by the Runge-Kutta method of the fourth order
+    """
     if type(accuracy) != int:
         accuracy = ndigits(accuracy)
     k1 = runge_kutta_k1(x, y)
@@ -28,26 +31,44 @@ def method_runge_kutta(x, y, h=H, accuracy=ACCURACY):
 
 
 def func_y(x, y):
+    """
+    The differentiable function
+    """
     return (math.cos(y) / (4 + x)) + y
 
 
 def runge_kutta_k1(x, y):
+    """
+    Runge-Kutta coefficient k1
+    """
     return func_y(x, y)
 
 
 def runge_kutta_k2(x, y, k1, h=H):
+    """
+    Runge-Kutta coefficient k2
+    """
     return func_y(x + h / 2, y + h / 2 * k1)
 
 
 def runge_kutta_k3(x, y, k2, h=H):
+    """
+    Runge-Kutta coefficient k3
+    """
     return func_y(x + h / 2, y + h / 2 * k2)
 
 
 def runge_kutta_k4(x, y, k3, h=H):
+    """
+    Runge-Kutta coefficient k4
+    """
     return func_y(x + h, y + h * k3)
 
 
 def runge_kutta_table(x, y, a, b, h):
+    """
+    Creation of a dictionary with the results of the Runge-Kutta method
+    """
     n = int((b - a) / h)
     keys = list()
     values = list()
@@ -65,6 +86,9 @@ def runge_kutta_table(x, y, a, b, h):
 
 
 def runge_kutta_table_iterate(x, y, a, b, h, accuracy=ACCURACY):
+    """
+    Iteration by the Runge-Kutta method to achieve the specified accuracy
+    """
     table1 = runge_kutta_table(x, y, a, b, h)
     table2 = runge_kutta_table(x, y, a, b, h / 2)
     values = list(table1.keys())
@@ -140,10 +164,16 @@ def iter_table_create(table, a, b, h=0.1, accuracy=ACCURACY):
 
 
 def integrate_func(y):
+    """
+    Integrand function
+    """
     return y ** 2
 
 
 def simpsons_formula(table, h=H):
+    """
+    Computing the integral by the Simpson method
+    """
     n = len(table)
     values = list(table.values())
     result = integrate_func(values[0]) + integrate_func(values[n - 1])
