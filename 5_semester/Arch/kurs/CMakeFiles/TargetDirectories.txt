@@ -1,0 +1,3 @@
+/home/shamann/sandbox/temp-vm/kurs/CMakeFiles/edit_cache.dir
+/home/shamann/sandbox/temp-vm/kurs/CMakeFiles/rebuild_cache.dir
+/home/shamann/sandbox/temp-vm/kurs/CMakeFiles/./bin/kurs.dir

@@ -1,0 +1,1 @@
+/usr/bin/cc  -g   CMakeFiles/./bin/kurs.dir/src/alu.c.o CMakeFiles/./bin/kurs.dir/src/bc.c.o CMakeFiles/./bin/kurs.dir/src/gui.c.o CMakeFiles/./bin/kurs.dir/src/main.c.o CMakeFiles/./bin/kurs.dir/src/mt.c.o CMakeFiles/./bin/kurs.dir/src/rk.c.o CMakeFiles/./bin/kurs.dir/src/sc.c.o  -o ./bin/kurs -rdynamic 
