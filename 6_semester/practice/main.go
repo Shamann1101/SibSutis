@@ -171,12 +171,22 @@ func toDecimal(number quartInt) (result int){
 		result += value * int(math.Pow(float64(capacity), float64(i)))
 	}
 
+	if int(number) < 0 {
+		result *= -1
+	}
+
 	return result
 }
 
 func fromDecimal(number int) quartInt{
 	modulo := 0
 	strResult := ""
+	sign := ""
+
+	if number < 0 {
+		sign = "-"
+		number *= -1
+	}
 
 	for {
 		modulo = number % capacity
@@ -187,7 +197,7 @@ func fromDecimal(number int) quartInt{
 		}
 	}
 
-	result, _ := strconv.Atoi(strResult)
+	result, _ := strconv.Atoi(sign + strResult)
 
 	return quartInt(result)
 }
