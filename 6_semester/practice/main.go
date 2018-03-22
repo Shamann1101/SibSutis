@@ -29,11 +29,12 @@ func addition(a, b quartInt) quartInt {
 		}
 		return subtraction(a, b)
 	} else {
-		if int(a) < 0 && int(b) < 0 {
+		switch {
+		case int(a) < 0 && int(b) < 0:
 			sign = "-"
-		} else if int(a) == 0 {
+		case int(a) == 0:
 			return b
-		} else if int(b) == 0 {
+		case int(b) == 0:
 			return a
 		}
 	}
@@ -67,7 +68,7 @@ func addition(a, b quartInt) quartInt {
 		add = intA + intB + overflow
 		overflow = 0
 		if add >= capacity {
-			overflow = add /capacity
+			overflow = add / capacity
 			add %= capacity
 		}
 		result = strconv.Itoa(add) + result
