@@ -221,29 +221,37 @@ func userInterface() {
 		case 1:
 			var a int
 			clrscr()
-			fmt.Println("Input number")
+			fmt.Println("Decimal to quart")
+			fmt.Print("Input number ")
 			fmt.Scanf("%d", &a)
+			fmt.Print("Result: ")
 			fmt.Println(fromDecimal(a))
 			fmt.Scanln()
 		case 2:
 			var a quartInt
 			clrscr()
-			fmt.Println("Input number")
+			fmt.Println("Quart to decimal")
+			fmt.Print("Input number ")
 			fmt.Scanf("%d", &a)
+			fmt.Print("Result: ")
 			fmt.Println(toDecimal(a))
 			fmt.Scanln()
 		case 3:
 			var a, b quartInt
 			clrscr()
-			fmt.Println("Input numbers")
+			fmt.Println("Addition")
+			fmt.Print("Input numbers ")
 			fmt.Scanf("%d %d", &a, &b)
+			fmt.Print("Result: ")
 			fmt.Println(addition(a, b))
 			fmt.Scanln()
 		case 4:
 			var a, b quartInt
 			clrscr()
-			fmt.Println("Input numbers")
+			fmt.Println("Subtraction")
+			fmt.Print("Input numbers ")
 			fmt.Scanf("%d %d", &a, &b)
+			fmt.Print("Result: ")
 			fmt.Println(subtraction(a, b))
 			fmt.Scanln()
 		}
