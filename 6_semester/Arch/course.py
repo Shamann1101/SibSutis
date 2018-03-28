@@ -1,13 +1,15 @@
 from __future__ import division
+import sys
 from numba import cuda, float32
 import numpy as np
-from timeit import default_timer as time
+from timeit import default_timer as timeit
+import time
 import math
 
 # Controls threads per block and shared memory usage.
 # The computation will be done on blocks of TPBxTPB elements.
 TPB = 16
-N = 2 ** 10
+LOGFILE = "log.txt"
 
 
 def matrix_multiplication(first_matrix, second_matrix, new_matrix, accuracy=4):
@@ -49,7 +51,7 @@ def fast_matmul(A, B, C):
     """
 
     # Define an array in the shared memory
-    # The size and type of the arrays must be known at compile time
+    # The size and type of the arrays must be known at compile timeit
     sA = cuda.shared.array(shape=(TPB, TPB), dtype=float32)
     sB = cuda.shared.array(shape=(TPB, TPB), dtype=float32)
 
@@ -83,51 +85,76 @@ def fast_matmul(A, B, C):
     C[x, y] = tmp
 
 
-# The data array
-A = np.random.random((N * 2, N * 3)).astype(np.float)
-B = np.random.random((N * 3, N * 1)).astype(np.float)
-height, _ = A.shape
-_, width = B.shape
-C = np.full((height, width), 0, np.float)
-elements = height * width
+def iterate(start_time, mul=1, ah=2, aw=3, bh=3, bw=1):
+    n = 2 ** (3 + mul)
+    assert aw == bh
+    ah, aw, bh, bw = ah*mul, aw*mul, bh*mul, bw*mul
 
-A_global_mem = cuda.to_device(A)
-B_global_mem = cuda.to_device(B)
-C_global_mem = cuda.device_array((height, width))  # [32 x 16] matrix result
+    # The data array
+    A = np.random.random((n * ah, n * aw)).astype(np.float)
+    B = np.random.random((n * bh, n * bw)).astype(np.float)
+    height_a, width_a = A.shape
+    height_b, width_b = B.shape
+    C = np.full((height_a, width_b), 0, np.float)
+    elements = height_a * width_b
 
-# Configure the blocks
-threadsperblock = (TPB, TPB)
-blockspergrid_x = int(math.ceil(A.shape[0] / threadsperblock[1]))
-blockspergrid_y = int(math.ceil(B.shape[1] / threadsperblock[0]))
-blockspergrid = (blockspergrid_x, blockspergrid_y)
+    A_global_mem = cuda.to_device(A)
+    B_global_mem = cuda.to_device(B)
+    C_global_mem = cuda.device_array((height_a, width_b))  # [32 x 16] matrix result
 
-# Start the kernel
-print('Number of elements: %d' % elements)
+    # Configure the blocks
+    threadsperblock = (TPB, TPB)
+    blockspergrid_x = int(math.ceil(A.shape[0] / threadsperblock[1]))
+    blockspergrid_y = int(math.ceil(B.shape[1] / threadsperblock[0]))
+    blockspergrid = (blockspergrid_x, blockspergrid_y)
 
-ts = time()
-matrix_multiplication(A, B, C)
-te = time()
+    # Start the kernel
+    # start = timeit()
 
-total_time = (te - ts)
+    ts = timeit()
+    matrix_multiplication(A, B, C)
+    te = timeit()
 
-print('Execution time %.4f' % total_time)
-print('Throughput %.4f' % (elements / total_time))
+    total_time = (te - ts)
+    throughput = elements / total_time
 
-ts = time()
-fast_matmul[blockspergrid, threadsperblock](A_global_mem, B_global_mem, C_global_mem)
-te = time()
-res = C_global_mem.copy_to_host()
+    ts = timeit()
+    fast_matmul[blockspergrid, threadsperblock](A_global_mem, B_global_mem, C_global_mem)
+    te = timeit()
+    res = C_global_mem.copy_to_host()
 
-total_time = (te - ts)
+    total_time_c = (te - ts)
+    throughput_c = elements / total_time_c
 
-print('Execution time %.4f' % total_time)
-print('Throughput %.4f' % (elements / total_time))
+    assert C.all() == res.all()
 
-assert C.all() == res.all()
+    with open(LOGFILE, "a") as file:
+        log = 'Start: {}\n' \
+              'Dimension: [{}x{}] x [{}x{}]\n' \
+              'CPU\n' \
+              'Execution timeit: {:.4}\n'\
+              'Throughput: {}\n'\
+              'GPU\n' \
+              'Execution timeit: {:.4}\n'\
+              'Throughput: {}\n'\
+            .format(
+                time.ctime(start_time),
+                height_a, width_a, height_b, width_b,
+                total_time,
+                throughput,
+                total_time_c,
+                throughput_c
+            )
+        print(log, file=file, sep="\n")
 
-"""
-Execution time 6265.3620
-Throughput 0.0460
-Execution time 0.2679
-Throughput 1074.8435
-"""
+
+def main():
+    iter1 = 1
+    if len(sys.argv[1:]):
+        iter1 = int(sys.argv.pop(1))
+
+    for i in range(iter1):
+        iterate(time.time(), i+1)
+
+if __name__ == '__main__':
+    main()
