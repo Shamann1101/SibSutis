@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from PyQt5.QtWidgets import (QWidget, QAction, qApp, QPushButton, QFileDialog,
-                             QTextEdit, QHBoxLayout, QVBoxLayout, QApplication)
+from PyQt5.QtWidgets import (QWidget, QAction, qApp, QProgressBar, QPushButton, QFileDialog,
+                             QTextEdit, QHBoxLayout, QVBoxLayout, QStatusBar, QApplication,
+                             QMessageBox)
+from PyQt5.QtCore import (QBasicTimer, QTimer)
 
 
 class Example(QWidget):
@@ -22,11 +24,20 @@ class Example(QWidget):
 
         self.reviewEdit = QTextEdit()
 
+        self.pbar = QProgressBar(self)
+        self.sb = QStatusBar(self)
+        self.sb.showMessage("Ready")
+
+        self.timer = QTimer()
+        self.timer.setInterval(1000)
+        self.timer.timeout.connect(self.autosaveFile)
+        self.timer.start()
+
         exitAction = QAction(self)
         exitAction.setShortcut('Ctrl+Q')
         exitAction.setStatusTip('Exit application')
         exitAction.triggered.connect(qApp.quit)
-        self.quitButton.clicked.connect(qApp.quit)
+        self.quitButton.clicked.connect(self.closeEvent)
 
         openFile = QAction(self)
         openFile.setShortcut('Ctrl+O')
@@ -48,6 +59,8 @@ class Example(QWidget):
         vbox.addWidget(self.saveButton)
         vbox.addWidget(self.clearButton)
         vbox.addWidget(self.quitButton)
+        vbox.addWidget(self.pbar)
+        vbox.addWidget(self.sb)
 
         hbox = QHBoxLayout()
         # hbox.addStretch(1)
@@ -61,23 +74,55 @@ class Example(QWidget):
         self.show()
 
     def readFile(self):
-        fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')[0]
+        fname = QFileDialog.getOpenFileName(self, 'Open file', './')[0]
         self.file = fname
         if fname:
             f = open(fname, 'r')
             with f:
                 data = f.read()
                 self.reviewEdit.setText(data)
+        self.sb.showMessage("Opened: " + fname)
 
     def saveFile(self):
+        if not self.file:
+            self.file = QFileDialog.getSaveFileName(self, 'Save file', './')[0]
         if self.file:
             with open(self.file, 'w') as file:
-                print(self.reviewEdit.toPlainText(), file=file, sep="\n")
+                print(self.reviewEdit.toPlainText(), file=file)
+        self.sb.showMessage("Saved: " + fname)
 
     def clearText(self):
         self.reviewEdit.setText("")
 
+    def autosaveFile(self):
+        if not self.file:
+            autosavefile = 'autosave.tmp'
+        else:
+            autosavefile = self.file[:-4] + '.tmp'
+        with open(autosavefile, 'w') as file:
+            print(self.reviewEdit.toPlainText(), file=file)
+        self.sb.showMessage("Saved: " + autosavefile)
 
+    def closeEvent(self, event):
+
+        reply = QMessageBox.question(self, 'Message',
+            "Are you sure to quit?", QMessageBox.Yes |
+            QMessageBox.No, QMessageBox.No)
+
+        if reply == QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
+"""
+    def timerEvent(self, e):
+        print(e)
+        if self.step >= 100:
+            self.timer.stop()
+            return
+
+        self.step = self.step + 1
+        self.pbar.setValue(self.step)
+"""
 if __name__ == '__main__':
 
     app = QApplication(sys.argv)
