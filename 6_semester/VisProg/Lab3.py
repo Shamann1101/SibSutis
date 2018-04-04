@@ -4,8 +4,9 @@
 import sys
 from PyQt5.QtWidgets import (QWidget, QAction, qApp, QProgressBar, QPushButton, QFileDialog,
                              QTextEdit, QHBoxLayout, QVBoxLayout, QStatusBar, QApplication,
-                             QMessageBox)
+                             QMessageBox, QMainWindow)
 from PyQt5.QtCore import (QBasicTimer, QTimer)
+from PyQt5.QtGui import QIcon
 
 
 class Example(QWidget):
@@ -33,11 +34,14 @@ class Example(QWidget):
         self.timer.timeout.connect(self.autosaveFile)
         self.timer.start()
 
-        exitAction = QAction(self)
-        exitAction.setShortcut('Ctrl+Q')
-        exitAction.setStatusTip('Exit application')
-        exitAction.triggered.connect(qApp.quit)
+        exitAct = QAction(QIcon('exit24.png'), 'Exit', self)
+        exitAct.setShortcut('Ctrl+Q')
+        # exitAct.setStatusTip('Exit application')
+        exitAct.triggered.connect(qApp.quit)
         self.quitButton.clicked.connect(self.closeEvent)
+
+        self.toolbar = self.addToolBar('Exit')
+        self.toolbar.addAction(exitAct)
 
         openFile = QAction(self)
         openFile.setShortcut('Ctrl+O')
@@ -89,7 +93,7 @@ class Example(QWidget):
         if self.file:
             with open(self.file, 'w') as file:
                 print(self.reviewEdit.toPlainText(), file=file)
-        self.sb.showMessage("Saved: " + fname)
+        self.sb.showMessage("Saved: " + self.file)
 
     def clearText(self):
         self.reviewEdit.setText("")
@@ -104,10 +108,11 @@ class Example(QWidget):
         self.sb.showMessage("Saved: " + autosavefile)
 
     def closeEvent(self, event):
+        print(event)
 
         reply = QMessageBox.question(self, 'Message',
-            "Are you sure to quit?", QMessageBox.Yes |
-            QMessageBox.No, QMessageBox.No)
+                                     "Are you sure to quit?", QMessageBox.Yes |
+                                     QMessageBox.No, QMessageBox.No)
 
         if reply == QMessageBox.Yes:
             event.accept()
