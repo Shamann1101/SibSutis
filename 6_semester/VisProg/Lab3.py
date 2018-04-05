@@ -4,8 +4,8 @@
 import sys
 from PyQt5.QtWidgets import (QWidget, QAction, QProgressBar, QPushButton, QFileDialog, QCheckBox,
                              QTextEdit, QHBoxLayout, QVBoxLayout, QStatusBar, QApplication, QRadioButton,
-                             QMessageBox, QMainWindow, QSpinBox, QColorDialog, QFontDialog)
-from PyQt5.QtCore import (QBasicTimer, QTimer, QCoreApplication)
+                             QMessageBox, QMainWindow, QSpinBox, QColorDialog, QFontDialog, QMenu)
+from PyQt5.QtCore import (QTimer, QObject)
 from PyQt5.QtGui import QIcon
 
 
@@ -27,8 +27,16 @@ class MyMainWindow(QMainWindow):
         aboutAct = QAction('Ab&out', self)
         aboutAct.triggered.connect(self.aboutAction)
 
+        saveMenu = QMenu('&Save', self)
+        saveFile = QAction('&Save', self)
+        saveFile.setShortcut('Ctrl+S')
+        saveFile.setStatusTip('Save File')
+        saveFile.triggered.connect(self.form_widget.saveFile)
+        saveMenu.addAction(saveFile)
+
         self.menubar = self.menuBar()
         fileMenu = self.menubar.addMenu('&File')
+        fileMenu.addMenu(saveMenu)
         fileMenu.addAction(aboutAct)
         fileMenu.addAction(exitAct)
 
@@ -142,14 +150,12 @@ class FormWidget(QWidget):
             self.sb.showMessage("Opened: " + fname)
 
     def saveFile(self):
-        print(">> " + self.file)
         if self.saveRB.isChecked():
             return self.saveinFile()
         else:
             return self.saveasFile()
 
     def saveinFile(self):
-        print(">> " + self.file)
         if not self.file:
             return self.saveasFile()
         if self.file:
@@ -163,6 +169,7 @@ class FormWidget(QWidget):
             with open(filepath, 'w') as file:
                 print(self.reviewEdit.toPlainText(), file=file)
             self.sb.showMessage("Saved: " + filepath)
+            self.file = filepath
 
     def clearText(self):
         self.reviewEdit.setText("")
@@ -173,7 +180,6 @@ class FormWidget(QWidget):
                 autosavefile = 'autosave.tmp'
             else:
                 name = self.file.rfind('.')
-                print(name)
                 autosavefile = self.file[:name] + '.tmp'
             with open(autosavefile, 'w') as file:
                 print(self.reviewEdit.toPlainText(), file=file)
@@ -199,6 +205,14 @@ class FormWidget(QWidget):
         self.timer.timeout.connect(self.autosaveFile)
         if self.autosaveCB.checkState():
             self.timer.start()
+"""
+    def timerEvent(self, e):
+        if self.step >= 100:
+            self.step = 0
+        self.step = self.step + 1
+        self.pbar.setValue(self.step)
+        QObject.timerEvent(self)
+"""
 
 
 if __name__ == '__main__':
