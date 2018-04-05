@@ -64,6 +64,7 @@ class MyMainWindow(QMainWindow):
 class FormWidget(QWidget):
 
     file = ""
+    pbStep = 0
 
     def __init__(self, parent):
         super(FormWidget, self).__init__(parent)
@@ -95,6 +96,7 @@ class FormWidget(QWidget):
         self.sb.showMessage("Ready")
 
         self.timer = QTimer()
+        self.pbTimer = QTimer()
 
         self.getcolorButton.clicked.connect(self.getColor)
 
@@ -162,6 +164,7 @@ class FormWidget(QWidget):
             with open(self.file, 'w') as file:
                 print(self.reviewEdit.toPlainText(), file=file)
         self.sb.showMessage("Saved: " + self.file)
+        self.timerPB()
 
     def saveasFile(self):
         filepath = QFileDialog.getSaveFileName(self, 'Save file', './')[0]
@@ -170,6 +173,7 @@ class FormWidget(QWidget):
                 print(self.reviewEdit.toPlainText(), file=file)
             self.sb.showMessage("Saved: " + filepath)
             self.file = filepath
+            self.timerPB()
 
     def clearText(self):
         self.reviewEdit.setText("")
@@ -205,14 +209,22 @@ class FormWidget(QWidget):
         self.timer.timeout.connect(self.autosaveFile)
         if self.autosaveCB.checkState():
             self.timer.start()
-"""
-    def timerEvent(self, e):
-        if self.step >= 100:
-            self.step = 0
-        self.step = self.step + 1
-        self.pbar.setValue(self.step)
-        QObject.timerEvent(self)
-"""
+
+    def timerPB(self):
+        if self.pbTimer.isActive():
+            self.pbTimer.stop()
+        self.pbTimer.setInterval(10)
+        self.pbTimer.timeout.connect(self.drawPB)
+        self.pbTimer.start()
+
+    def drawPB(self):
+        if self.pbStep == 100:
+            self.pbStep = 0
+            self.pbTimer.stop()
+            return
+        self.pbStep += 5
+        self.pbar.setValue(self.pbStep)
+
 
 
 if __name__ == '__main__':
