@@ -139,7 +139,7 @@ class FormWidget(QWidget):
             with f:
                 data = f.read()
                 self.reviewEdit.setText(data)
-        self.sb.showMessage("Opened: " + fname)
+            self.sb.showMessage("Opened: " + fname)
 
     def saveFile(self):
         print(">> " + self.file)
@@ -172,7 +172,9 @@ class FormWidget(QWidget):
             if not self.file:
                 autosavefile = 'autosave.tmp'
             else:
-                autosavefile = self.file[:-4] + '.tmp'
+                name = self.file.rfind('.')
+                print(name)
+                autosavefile = self.file[:name] + '.tmp'
             with open(autosavefile, 'w') as file:
                 print(self.reviewEdit.toPlainText(), file=file)
             self.sb.showMessage("Saved: " + autosavefile)
