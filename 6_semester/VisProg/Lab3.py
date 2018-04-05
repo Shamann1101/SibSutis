@@ -55,6 +55,8 @@ class MyMainWindow(QMainWindow):
 
 class FormWidget(QWidget):
 
+    file = ""
+
     def __init__(self, parent):
         super(FormWidget, self).__init__(parent)
         self.initUI(parent)
@@ -68,12 +70,15 @@ class FormWidget(QWidget):
         self.quitButton = QPushButton("Quit")
 
         self.autosaveCB = QCheckBox("Autosave")
+        self.autosaveCB.stateChanged .connect(self.timerUpdate)
         self.autosaveSB = QSpinBox()
-        self.autosaveSB.setMinimum(1000)
-        self.autosaveSB.setMaximum(60000)
+        self.autosaveSB.setMinimum(1)
+        self.autosaveSB.setMaximum(60)
+        self.autosaveSB.valueChanged.connect(self.timerUpdate)
 
         self.saveRB = QRadioButton("Save")
         self.saveasRB = QRadioButton("Save us")
+        self.saveasRB.setChecked(True)
 
         self.reviewEdit = QTextEdit()
 
@@ -82,10 +87,6 @@ class FormWidget(QWidget):
         self.sb.showMessage("Ready")
 
         self.timer = QTimer()
-        interval = self.autosaveSB.value()
-        self.timer.setInterval(interval)
-        # self.timer.timeout.connect(self.autosaveFile)
-        self.timer.start()
 
         self.getcolorButton.clicked.connect(self.getColor)
 
@@ -141,24 +142,40 @@ class FormWidget(QWidget):
         self.sb.showMessage("Opened: " + fname)
 
     def saveFile(self):
+        print(">> " + self.file)
+        if self.saveRB.isChecked():
+            return self.saveinFile()
+        else:
+            return self.saveasFile()
+
+    def saveinFile(self):
+        print(">> " + self.file)
         if not self.file:
-            self.file = QFileDialog.getSaveFileName(self, 'Save file', './')[0]
+            return self.saveasFile()
         if self.file:
             with open(self.file, 'w') as file:
                 print(self.reviewEdit.toPlainText(), file=file)
         self.sb.showMessage("Saved: " + self.file)
 
+    def saveasFile(self):
+        filepath = QFileDialog.getSaveFileName(self, 'Save file', './')[0]
+        if filepath:
+            with open(filepath, 'w') as file:
+                print(self.reviewEdit.toPlainText(), file=file)
+            self.sb.showMessage("Saved: " + filepath)
+
     def clearText(self):
         self.reviewEdit.setText("")
 
     def autosaveFile(self):
-        if not self.file:
-            autosavefile = 'autosave.tmp'
-        else:
-            autosavefile = self.file[:-4] + '.tmp'
-        with open(autosavefile, 'w') as file:
-            print(self.reviewEdit.toPlainText(), file=file)
-        self.sb.showMessage("Saved: " + autosavefile)
+        if self.autosaveCB.checkState():
+            if not self.file:
+                autosavefile = 'autosave.tmp'
+            else:
+                autosavefile = self.file[:-4] + '.tmp'
+            with open(autosavefile, 'w') as file:
+                print(self.reviewEdit.toPlainText(), file=file)
+            self.sb.showMessage("Saved: " + autosavefile)
 
     def getColor(self):
         col = QColorDialog.getColor()
@@ -171,6 +188,15 @@ class FormWidget(QWidget):
         font, ok = QFontDialog.getFont()
         if ok:
             self.reviewEdit.setFont(font)
+
+    def timerUpdate(self):
+        if self.timer.isActive():
+            self.timer.stop()
+        interval = self.autosaveSB.value() * 1000
+        self.timer.setInterval(interval)
+        self.timer.timeout.connect(self.autosaveFile)
+        if self.autosaveCB.checkState():
+            self.timer.start()
 
 
 if __name__ == '__main__':
