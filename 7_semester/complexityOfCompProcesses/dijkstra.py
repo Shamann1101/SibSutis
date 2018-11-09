@@ -91,6 +91,25 @@ def dijkstra(vertex_list, target_id):
             nearest_graph.set_visited()
 
 
+def find_path(vertex_list, source_id, target_id):
+    msg = ""
+    try:
+        if source_id < 0 or source_id > Graph.object_count:
+            msg = "source_id"
+            raise ValueError()
+        if target_id < 0 or target_id > Graph.object_count:
+            msg = "target_id"
+            raise ValueError()
+    except ValueError:
+        print(msg + " id out os scope")
+    else:
+        intended_vertex = vertex_list[target_id].neighbours.copy()
+        for neighbour in vertex_list[target_id].neighbours:
+            if vertex_list[neighbour].calculated_weight >= vertex_list[target_id].calculated_weight:
+                intended_vertex.pop(neighbour)
+        print(intended_vertex)
+
+
 def main():
     vertex_list = []
     for i in range(6):
@@ -118,6 +137,8 @@ def main():
 
     for vertex in vertex_list:
         print(vertex, "weight:", vertex.calculated_weight)
+
+    find_path(vertex_list, 0, 4)
 
 
 if __name__ == '__main__':
