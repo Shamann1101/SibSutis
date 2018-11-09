@@ -34,7 +34,7 @@ class Graph:
         self._increase_object_count()
 
     def __str__(self):
-        return "Title: " + self.title
+        return "Title: " + str(self.title)
 
     def __del__(self):
         self._decrease_object_count()
@@ -57,37 +57,44 @@ class Graph:
 
 
 def dijkstra(vertex_list, target_id):
-    path_list = {vertex_list[target_id]: 0}
-    vertex_list[target_id].calculated_weight = 0
-    while Graph.object_visited < Graph.object_count and len(path_list) > 0:
-        nearest_graph = min(path_list, key=path_list.get)
-        for neighbour in nearest_graph.neighbours:
-            neighbour = int(neighbour)
-            if vertex_list[neighbour].is_visited:
-                continue
+    """
+    Sets vertex weights by easiest way based on Dijkstra's algorithm
+    :param vertex_list: array of Graph objects
+    :param target_id: source id
+    :return:
+    """
+    try:
+        if target_id < 0 or target_id > Graph.object_count:
+            raise ValueError
+    except ValueError:
+        print("Target id out os scope")
+    else:
+        path_list = {vertex_list[target_id]: 0}
+        vertex_list[target_id].calculated_weight = 0
+        while Graph.object_visited < Graph.object_count and len(path_list) > 0:
+            nearest_graph = min(path_list, key=path_list.get)
+            for neighbour in nearest_graph.neighbours:
+                if vertex_list[neighbour].is_visited:
+                    continue
 
-            print("neighbour:", neighbour)
-            calculated_weight = nearest_graph.calculated_weight + nearest_graph.neighbours[str(neighbour)]
-            print("calculated_weight:", calculated_weight)
+                print("neighbour:", neighbour)
+                calculated_weight = nearest_graph.calculated_weight + nearest_graph.neighbours[neighbour]
+                print("calculated_weight:", calculated_weight)
 
-            if calculated_weight < vertex_list[neighbour].calculated_weight:
-                vertex_list[neighbour].calculated_weight = calculated_weight
+                if calculated_weight < vertex_list[neighbour].calculated_weight:
+                    vertex_list[neighbour].calculated_weight = calculated_weight
 
-            if vertex_list[neighbour] not in path_list:
-                path_list[vertex_list[neighbour]] = calculated_weight
+                if vertex_list[neighbour] not in path_list:
+                    path_list[vertex_list[neighbour]] = calculated_weight
 
-        path_list.pop(nearest_graph)
-        nearest_graph.set_visited()
-
-    for vertex in vertex_list:
-        print("title:", vertex.title, "weight:", vertex.calculated_weight)
+            path_list.pop(nearest_graph)
+            nearest_graph.set_visited()
 
 
 def main():
     vertex_list = []
     for i in range(6):
-        vertex_list.append(Graph(str(i)))
-        # print(vertex_list[i])
+        vertex_list.append(Graph(i))
     vertex_list[0].neighbours = {vertex_list[1].title: 7,
                                  vertex_list[2].title: 9,
                                  vertex_list[5].title: 14}
@@ -108,6 +115,9 @@ def main():
                                  vertex_list[4].title: 9}
 
     dijkstra(vertex_list, 0)
+
+    for vertex in vertex_list:
+        print(vertex, "weight:", vertex.calculated_weight)
 
 
 if __name__ == '__main__':
