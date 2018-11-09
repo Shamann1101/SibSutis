@@ -1,26 +1,5 @@
-from random import randint
-
-
-def array_fill(n):
-    """
-    Return array full of random numbers
-    :param n: limit
-    :return: array
-    """
-    try:
-        if n <= 0:
-            raise ValueError
-    except ValueError:
-        print("Limit must be positive number")
-    else:
-        arr = [0] * n
-        for i in range(n):
-            while True:
-                rand_int = randint(0, n)
-                if rand_int not in arr:
-                    arr[i] = rand_int
-                    break
-        return arr
+from random import sample
+import argparse
 
 
 def array_merge(first_array, second_array):
@@ -31,11 +10,16 @@ def array_merge(first_array, second_array):
     :return:iteration
     """
     try:
-        if len(first_array) < 1 or len(second_array) < 1:
+        if len(first_array) < 1 and len(second_array) < 1:
             raise ValueError
     except ValueError:
         print("Array's length must be positive")
     else:
+        if len(first_array) < 1:
+            return second_array
+        elif len(second_array) < 1:
+            return first_array
+
         result_array = [0] * (len(first_array) + len(second_array))
         i, j = 0, 0
 
@@ -58,19 +42,47 @@ def array_merge(first_array, second_array):
 
 
 def merge_sort(source_array):
-    numbers = 1
-    result_array = source_array
-    while numbers < len(result_array):
-        pair = 0
-        while (pair+1)*numbers*2 <= len(result_array):
-            print(result_array[pair*numbers*2:(pair+1)*numbers*2])
-            pair += 1
-        break
+    """
+    Returns merge-sorted array. Sort using without recursion
+    :param source_array:
+    :return:
+    """
+    try:
+        if len(source_array) < 1:
+            raise ValueError
+    except ValueError:
+        print("Array's length must be positive")
+    else:
+        numbers = 1
+        result_array = source_array.copy()
+        while numbers < len(result_array):
+            pair, left_limit = 0, 0
+            while left_limit <= len(result_array):
+                if 0 < len(result_array[left_limit:]) <= numbers:
+                    if args.print:
+                        print(result_array[left_limit:])
+                    result_array[left_limit:] = array_merge(result_array[left_limit:], [])
+                elif len(result_array[left_limit:]) > 0:
+                    if args.print:
+                        print(result_array[left_limit:left_limit+numbers],
+                              result_array[left_limit+numbers:(pair+1)*numbers*2])
+                    result_array[left_limit:(pair+1)*numbers*2] = \
+                        array_merge(result_array[left_limit:left_limit+numbers],
+                                    result_array[left_limit+numbers:(pair+1)*numbers*2])
+                pair += 1
+                left_limit = pair * numbers * 2
+            numbers *= 2
+        return result_array
 
 
 if __name__ == '__main__':
-    n = 11
-    arr = array_fill(n)
-    print(arr)
-    merge_sort(arr)
-    # print(array_merge(arr[:int(n/2)], arr[int(n/2):]))
+    parser = argparse.ArgumentParser(description='Merge sorting')
+    parser.add_argument('limit', type=int, nargs='?', help='Size of sample array. Default 11')
+    parser.add_argument('--print', action='store_true', help='Print log')
+    args = parser.parse_args()
+
+    limit = int(args.limit) if args.limit and args.limit > 0 else 11
+    new_array = sample(range(limit), limit)
+    print("Source array:", new_array)
+    sorted_array = merge_sort(new_array)
+    print("Sorted array:", sorted_array)
