@@ -1,5 +1,5 @@
 from math import inf
-# from random import randint
+import argparse
 
 
 class Graph:
@@ -19,12 +19,16 @@ class Graph:
         cls.object_count += 1
 
     @classmethod
-    def _decrease_object_visited(cls):
-        cls.object_visited -= 1
-
-    @classmethod
     def _decrease_object_count(cls):
         cls.object_count -= 1
+
+    @classmethod
+    def _increase_object_visited(cls):
+        cls.object_visited += 1
+
+    @classmethod
+    def _decrease_object_visited(cls):
+        cls.object_visited -= 1
 
     def __init__(self, title):
         self.title = title
@@ -52,8 +56,9 @@ class Graph:
         self._neighbours = value
 
     def set_visited(self):
-        self.is_visited = True
-        self._decrease_object_visited()
+        if not self.is_visited:
+            self.is_visited = True
+            self._increase_object_visited()
 
 
 def dijkstra(vertex_list, target_id):
@@ -73,13 +78,17 @@ def dijkstra(vertex_list, target_id):
         vertex_list[target_id].calculated_weight = 0
         while Graph.object_visited < Graph.object_count and len(path_list) > 0:
             nearest_graph = min(path_list, key=path_list.get)
+            if args.print:
+                print(nearest_graph)
             for neighbour in nearest_graph.neighbours:
                 if vertex_list[neighbour].is_visited:
                     continue
 
-                print("neighbour:", neighbour)
+                if args.print:
+                    print("\tneighbour:", neighbour)
                 calculated_weight = nearest_graph.calculated_weight + nearest_graph.neighbours[neighbour]
-                print("calculated_weight:", calculated_weight)
+                if args.print:
+                    print("\tcalculated_weight:", calculated_weight)
 
                 if calculated_weight < vertex_list[neighbour].calculated_weight:
                     vertex_list[neighbour].calculated_weight = calculated_weight
@@ -89,25 +98,42 @@ def dijkstra(vertex_list, target_id):
 
             path_list.pop(nearest_graph)
             nearest_graph.set_visited()
+            if args.print:
+                print(nearest_graph, "set_visited\n")
 
 
-def find_path(vertex_list, source_id, target_id):
+def find_path(vertex_list, source_id, target_id, path=[]):
     msg = ""
     try:
+        if Graph.object_visited < Graph.object_count:
+            msg = "Need to execute `dijkstra` first"
+            print(Graph.object_visited, Graph.object_count)
+            raise RuntimeError
         if source_id < 0 or source_id > Graph.object_count:
-            msg = "source_id"
+            msg = "source_id is out os scope"
             raise ValueError()
         if target_id < 0 or target_id > Graph.object_count:
-            msg = "target_id"
+            msg = "target_id is out os scope"
             raise ValueError()
+        if source_id == target_id:
+            pass
+            # msg = "You have already arrived at your destination"
+            # raise ValueError()
     except ValueError:
-        print(msg + " id out os scope")
+        print(msg)
+    except RuntimeError:
+        print(msg)
     else:
         intended_vertex = vertex_list[target_id].neighbours.copy()
         for neighbour in vertex_list[target_id].neighbours:
-            if vertex_list[neighbour].calculated_weight >= vertex_list[target_id].calculated_weight:
+            if vertex_list[neighbour].calculated_weight != vertex_list[target_id].calculated_weight - vertex_list[target_id].neighbours[neighbour]:
                 intended_vertex.pop(neighbour)
+            # print()
         print(intended_vertex)
+        for vertex in intended_vertex:
+            path.append(vertex)
+            return find_path(vertex_list, source_id, vertex, path)
+        return path
 
 
 def main():
@@ -133,13 +159,24 @@ def main():
                                  vertex_list[2].title: 2,
                                  vertex_list[4].title: 9}
 
-    dijkstra(vertex_list, 0)
+    source_vertex = int(args.source) if args.source and 0 <= args.source < Graph.object_count else 0
+    target_vertex = int(args.target) if args.target and 0 <= args.target < Graph.object_count else 4
+
+    dijkstra(vertex_list, source_vertex)
 
     for vertex in vertex_list:
         print(vertex, "weight:", vertex.calculated_weight)
 
-    find_path(vertex_list, 0, 4)
+    if args.target:
+        p = find_path(vertex_list, source_vertex, target_vertex)
+        print("p:", p)
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Dijkstra’s algorithm')
+    parser.add_argument('source', type=int, nargs='?', help='Source vertex')
+    parser.add_argument('target', type=int, nargs='?', help='Target vertex')
+    parser.add_argument('--print', action='store_true', help='Print log')
+    args = parser.parse_args()
+
     main()
