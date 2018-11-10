@@ -74,6 +74,8 @@ def dijkstra(vertex_list, target_id):
     except ValueError:
         print("Target id out os scope")
     else:
+        if args.print:
+            print("=== Dijkstra's algorithm ===")
         path_list = {vertex_list[target_id]: 0}
         vertex_list[target_id].calculated_weight = 0
         while Graph.object_visited < Graph.object_count and len(path_list) > 0:
@@ -115,24 +117,34 @@ def find_path(vertex_list, source_id, target_id, path=[]):
         if target_id < 0 or target_id > Graph.object_count:
             msg = "target_id is out os scope"
             raise ValueError()
-        if source_id == target_id:
-            pass
-            # msg = "You have already arrived at your destination"
-            # raise ValueError()
     except ValueError:
         print(msg)
     except RuntimeError:
         print(msg)
     else:
+        if args.print:
+            print("=== Path finding ===")
+        if len(path) == 0:
+            path.append(target_id)
         intended_vertex = vertex_list[target_id].neighbours.copy()
         for neighbour in vertex_list[target_id].neighbours:
-            if vertex_list[neighbour].calculated_weight != vertex_list[target_id].calculated_weight - vertex_list[target_id].neighbours[neighbour]:
+            if vertex_list[neighbour].calculated_weight != vertex_list[target_id].calculated_weight - \
+                    vertex_list[target_id].neighbours[neighbour]:
                 intended_vertex.pop(neighbour)
-            # print()
-        print(intended_vertex)
-        for vertex in intended_vertex:
-            path.append(vertex)
-            return find_path(vertex_list, source_id, vertex, path)
+        if args.print:
+            print(intended_vertex)
+        if len(intended_vertex) == 1:
+            vertex = intended_vertex.popitem()
+            path.append(vertex[0])
+            return find_path(vertex_list, source_id, vertex[0], path)
+        elif len(intended_vertex) > 1:
+            new_path = []
+            for vertex in intended_vertex:
+                branch = list()
+                branch.append(vertex)
+                find_path(vertex_list, source_id, vertex, branch)
+                new_path.append(branch)
+            path.extend(new_path)
         return path
 
 
@@ -168,8 +180,8 @@ def main():
         print(vertex, "weight:", vertex.calculated_weight)
 
     if args.target:
-        p = find_path(vertex_list, source_vertex, target_vertex)
-        print("p:", p)
+        path = find_path(vertex_list, source_vertex, target_vertex)
+        print("Path:", path)
 
 
 if __name__ == '__main__':
