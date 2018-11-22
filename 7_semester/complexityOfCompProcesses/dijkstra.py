@@ -15,12 +15,14 @@ def dijkstra(vertex_list, target_id):
     except ValueError:
         print("Target id out os scope")
     else:
+        scope = {}
         if args.print:
             print("=== Dijkstra's algorithm ===")
         path_list = {vertex_list[target_id]: 0}
         vertex_list[target_id].calculated_weight = 0
         while Graph.object_visited < Graph.object_count and len(path_list) > 0:
             nearest_graph = min(path_list, key=path_list.get)
+            scope[nearest_graph] = {}
             if args.print:
                 print(nearest_graph)
             for neighbour in nearest_graph.neighbours:
@@ -32,12 +34,16 @@ def dijkstra(vertex_list, target_id):
                 calculated_weight = nearest_graph.calculated_weight + nearest_graph.neighbours[neighbour]
                 if args.print:
                     print("\tcalculated_weight:", calculated_weight)
+                scope[nearest_graph][neighbour] = calculated_weight
 
                 if calculated_weight < vertex_list[neighbour].calculated_weight:
                     vertex_list[neighbour].calculated_weight = calculated_weight
 
                 if vertex_list[neighbour] not in path_list:
                     path_list[vertex_list[neighbour]] = calculated_weight
+            scope[nearest_graph][nearest_graph.title] = "-"
+            # TODO: Edit table print
+            print("{}\t {}\t| {}\t| {}\t| {}".format(nearest_graph, scope[nearest_graph].setdefault(1, None), scope[nearest_graph].setdefault(2, None), scope[nearest_graph].setdefault(3, None), scope[nearest_graph].setdefault(4, None)))
 
             path_list.pop(nearest_graph)
             nearest_graph.set_visited()
@@ -112,16 +118,34 @@ def main():
                                  vertex_list[2].title: 2,
                                  vertex_list[4].title: 9}
 
+    v2 = []
+    for i in range(5):
+        v2.append(Graph(i))
+    v2[0].neighbours = {v2[1].title: 25,
+                        v2[2].title: 15,
+                        v2[3].title: 7,
+                        v2[4].title: 2}
+    v2[1].neighbours = {v2[0].title: 25,
+                        v2[2].title: 8}
+    v2[2].neighbours = {v2[0].title: 15,
+                        v2[1].title: 8,
+                        v2[3].title: 4}
+    v2[3].neighbours = {v2[0].title: 7,
+                        v2[2].title: 4,
+                        v2[4].title: 3}
+    v2[4].neighbours = {v2[0].title: 2,
+                        v2[3].title: 3}
+
     source_vertex = int(args.source) if args.source and 0 <= args.source < Graph.object_count else 0
     target_vertex = int(args.target) if args.target and 0 <= args.target < Graph.object_count else 4
 
-    dijkstra(vertex_list, source_vertex)
+    dijkstra(v2, source_vertex)
 
-    for vertex in vertex_list:
+    for vertex in v2:
         print(vertex, "weight:", vertex.calculated_weight)
 
     if args.target:
-        path = find_path(vertex_list, source_vertex, target_vertex)
+        path = find_path(v2, source_vertex, target_vertex)
         print("Path:", path)
 
 
