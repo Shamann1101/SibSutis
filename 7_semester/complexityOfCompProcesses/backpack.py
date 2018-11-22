@@ -1,36 +1,58 @@
+class Backpack:
+    def __init__(self, title, *args):
+        self.title = title
+        self.price = 0
+        self.parent = None
+        self.kit = {}
+        if args:
+            if type(args[0]) == dict:
+                for item in args[0]:
+                    self.kit[item] = 0
+
+    def __str__(self):
+        return str(self.title) + str(self.kit)
+
+    def __repr__(self):
+        return "price: " + str(self.price) + "\tkit: " + str(self.kit) + "\n"
+
+
 def backpack_fill(backpack, price, n):
     if n < 0:
         return backpack
     if n not in backpack:
-        backpack[n] = 0
+        backpack[n] = Backpack(n, price)
     for item in price:
         item = n - item
         if item not in backpack and item >= 0:
-            backpack[item] = 0
+            backpack[item] = Backpack(item, price)
             backpack_fill(backpack, price, item)
     return backpack
 
 
-def backpack_set_weights(backpack, price, n):
+def backpack_set_prices(backpack, price, n):
     if n < 0:
         return -1
     elif n == 0:
         return 0
     if n in price:
-        backpack[n] = price[n]
+        backpack[n].price = price[n]
+        backpack[n].kit[n] = 1
         return price[n]
-    if backpack[n] > 0:
-        return backpack[n]
-    weights = []
+    if backpack[n].price > 0:
+        return backpack[n].price
+    weights = price.copy()
     for item in price:
-        weight = backpack_set_weights(backpack, price, n - item)
+        weight = backpack_set_prices(backpack, price, n - item)
         if weight >= 0:
             weight += price[item]
-        weights.append(weight)
-    max_weight = max(weights)
-    if max_weight < 0:
-        max_weight = 0
-    backpack[n] = max_weight
+        weights[item] = weight
+    max_weight_price = max(weights, key=weights.get)
+    max_weight = 0
+    if weights[max_weight_price] > 0:
+        max_weight = weights[max_weight_price]
+        backpack[n].kit = backpack[n - max_weight_price].kit.copy()
+        backpack[n].kit[max_weight_price] += 1
+    backpack[n].price = max_weight
     return max_weight
 
 
@@ -54,11 +76,11 @@ def main():
 
     print(backpack_fill(backpack, price, n))
 
-    print(backpack_set_weights(backpack, price, n))
+    print(backpack_set_prices(backpack, price, n))
 
     print(backpack)
-
-    print(backpack_clean(backpack))
+    #
+    # print(backpack_clean(backpack))
 
 
 if __name__ == '__main__':
