@@ -23,7 +23,7 @@ def ford(vertex_list, target_id):
         message += "iteration: " + str(iteration) + "\n"
 
         weight_list[iteration] = [list() for _ in range(len(vertex_list))]
-        calculated_weight = [inf] * len(weight_list_result)
+        calculated_weight = weight_list_result.copy()
 
         for vertex in vertex_list:
             if int(vertex.title) == target_id:
