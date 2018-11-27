@@ -1,43 +1,60 @@
+import argparse
 from math import inf
+
 from graph import Graph
 
 
 def ford(vertex_list, target_id):
+    """
+    Sets vertex weights based on Ford's algorithm
+    :param vertex_list: array of Graph objects
+    :param target_id: source id
+    :return:
+    """
+    message = ""
     weight_list = [list() for _ in range(len(vertex_list))]
     weight_list_result = [inf] * len(vertex_list)
     weight_list_result[target_id] = 0
 
     stabilization = False
     iteration = 0
+
     while not stabilization:
-        print("iteration:", iteration)
+        message += "iteration: " + str(iteration) + "\n"
+
         weight_list[iteration] = [list() for _ in range(len(vertex_list))]
         calculated_weight = [inf] * len(weight_list_result)
+
         for vertex in vertex_list:
             if int(vertex.title) == target_id:
                 continue
             weight_list[iteration][int(vertex.title)] = [inf] * len(vertex_list)
 
             for i in range(len(weight_list_result)):
-                w = inf
+                weight = inf
                 if vertex.neighbours.get(i):
-                    w = vertex.neighbours[i]
+                    weight = vertex.neighbours[i]
                 elif i == int(vertex.title):
-                    w = 0
-                weight_list[iteration][int(vertex.title)][i] = weight_list_result[i] + w
-                print(weight_list_result[i], w)
+                    weight = 0
+                weight_list[iteration][int(vertex.title)][i] = weight_list_result[i] + weight
+                message += str(weight_list_result[i]) + " " + str(weight) + "\n"
 
             calculated_weight[int(vertex.title)] = min(weight_list[iteration][int(vertex.title)])
-            print()
+            message += "\n"
 
         if calculated_weight == weight_list_result:
             stabilization = True
         else:
             weight_list_result = calculated_weight
             iteration += 1
-    print(weight_list)
-    print(weight_list_result)
-    print(calculated_weight)
+
+    for string in weight_list:
+        message += str(string) + "\n"
+
+    if args.print:
+        print(message)
+
+    return weight_list_result
 
 
 def main():
@@ -59,8 +76,15 @@ def main():
     vertex_list[4].neighbours = {vertex_list[0].title: 2,
                                  vertex_list[3].title: 3}
 
-    ford(vertex_list, 0)
+    source_vertex = int(args.source) if args.source and 0 <= args.source < Graph.object_count else 0
+
+    print(ford(vertex_list, source_vertex))
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Ford’s algorithm')
+    parser.add_argument('source', type=int, nargs='?', help='Source vertex')
+    parser.add_argument('--print', action='store_true', help='Print log')
+    args = parser.parse_args()
+
     main()
