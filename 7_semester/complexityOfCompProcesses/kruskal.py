@@ -24,12 +24,11 @@ def kruskal(vertex_list, edge_list_sorted):
     for i in range(len(vertex_list)):
         new_vertex_list.append(Graph(i))
         connections.append(vertex_list[i].title)
-    print(connections)
 
     new_graph_edges = []
     edge_list = edge_list_sorted.copy()
     edge_list.reverse()
-    while len(edge_list):
+    while len(edge_list) and len(connections) > 1:
         # print("len:", len(connections))
         skip = False
         edge = edge_list.pop()
@@ -42,34 +41,40 @@ def kruskal(vertex_list, edge_list_sorted):
             continue
 
         for connection in connections:
-            print("connections:", connections, "connection:", connection)
-            print("first_vertex:", first_vertex, "second_vertex:", second_vertex)
             if type(connection) == tuple and first_vertex in connection and second_vertex in connection:
                 skip = True
                 break
+
+        print("connections:", connections, "edge:", edge, "skip:", skip)
+        print("new_graph_edges:", new_graph_edges)
 
         if skip:
             continue
 
         index = []
         for i in range(len(connections)):
-            if type(connections[i]) == int and (first_vertex == connections[i] or second_vertex == connections[i]):
-                print("int")
+            if (type(connections[i]) == int and
+                (first_vertex == connections[i] or second_vertex == connections[i])) or \
+                    (type(connections[i]) == tuple and
+                     (first_vertex in connections[i] or second_vertex in connections[i])):
                 index.append(i)
-            elif type(connections[i]) == tuple and (first_vertex in connections[i] or second_vertex in connections[i]):
-                print("tuple")
-                index.append(i)
-        print("index:", index)
+
         a = []
         for i in index:
-            if type(i) == int:
+            if type(connections[i]) == int:
                 a.append(connections[i])
-            else:
+            elif type(connections[i]) == tuple:
                 a.extend(connections[i])
-        print("a:", a)
 
-    print(new_graph_edges)
-    print(connections)
+        new_graph_edges.append(edge)
+        connections[index[0]] = tuple(set(a))
+        connections.pop(index[len(index) - 1])
+
+        # new_vertex_list[first_vertex].neighbours[second_vertex] = vertex_list[first_vertex].neighbours[second_vertex]
+        # new_vertex_list[second_vertex].neighbours[first_vertex] = vertex_list[second_vertex].neighbours[first_vertex]
+
+    # return new_vertex_list, new_graph_edges
+    return new_graph_edges
 
 
 def main():
@@ -101,10 +106,10 @@ def main():
                                  vertex_list[4].title: 25,
                                  vertex_list[5].title: 36}
 
-    edge_dict, edge_list = get_edge_dict(vertex_list)
-    print(edge_dict)
-    print(edge_list)
-    kruskal(vertex_list, edge_list)
+    _, edge_list = get_edge_dict(vertex_list)
+    # print(edge_dict)
+    # print(edge_list)
+    print(kruskal(vertex_list, edge_list))
 
 
 if __name__ == '__main__':
