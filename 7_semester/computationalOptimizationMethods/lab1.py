@@ -18,42 +18,32 @@ def gauss(data):
         maximum = max(column)  # Get unsigned value
         maximum_index = column.index(maximum)
         maximum = gauss_data[index + maximum_index][index]  # Get signed value
-        print(f'Find max: {column}, {maximum}, {maximum_index}')
+        # print(f'Find max: {column}, {maximum}, {maximum_index}')
 
         temp = gauss_data[index]
         gauss_data[index] = gauss_data[index + maximum_index]
         gauss_data[index + maximum_index] = temp
         del temp
 
-        print_array(gauss_data)
+        # print_array(gauss_data)
         is_fill, is_calculate = False, False
-        calculate_count = 0
         while not is_fill or not is_calculate:
-            # print("New iteration")
-            for string in range(index, len(gauss_data)):
-                for elem in range(index, len(gauss_data[string])):
-                    # print(f'index: {index}, string: {string}, elem: {elem}, is_calculate: {is_calculate}')
+            for string in range(len(gauss_data)):
+                for elem in range(index+1, len(gauss_data[string])):
                     if string == index:
-                        if is_calculate or index == len(gauss_data) - 1:
-                            print(f'source: {gauss_data[string][elem]}, maximum: {maximum}')
-                            gauss_data[string][elem] /= maximum
-                            if index == len(gauss_data) - 1:
-                                is_fill, is_calculate = True, True
-                    elif elem == index:
-                        if is_calculate:
-                            gauss_data[string][elem] = 0
-                            is_fill = True
-                    elif not is_calculate:
-                        # print(string, elem)
-                        gauss_data[string][elem] = gauss_data[string][elem] - (gauss_data[index][elem] * gauss_data[string][index]) / maximum
-                        calculate_count += 1
-                        if calculate_count == (len(gauss_data) - index - 1) * (len(gauss_data[string]) - index - 1):
-                            is_calculate = True
+                        continue
+                    gauss_data[string][elem] = gauss_data[string][elem] - (gauss_data[index][elem] * gauss_data[string][index]) / maximum
+            is_calculate = True
 
-                # print(gauss_data[string])
+            for string in range(len(gauss_data)):
+                for elem in range(len(gauss_data[string])):
+                    if string == index and elem >= index:
+                        gauss_data[string][elem] /= maximum
+                    elif elem == index:
+                        gauss_data[string][elem] = 0
+            is_fill = True
+
         print_array(gauss_data)
-        # if index == 3:
-        #     break
     return gauss_data
 
 
