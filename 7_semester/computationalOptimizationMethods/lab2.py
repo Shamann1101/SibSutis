@@ -2,21 +2,37 @@ from random import random
 
 
 def calculate(pool, strat_a, strat_b, limit=100):
-    summ = 0
+    summary = 0
+    freq = list()
+    for i in range(len(pool)):
+        freq.append([0] * len(pool[0]))
     for iteration in range(limit):
         first_num = random()
-        i = 0 if first_num < strat_a else 1
+        if first_num < strat_a:
+            i = 0
+        else:
+            i = 1
+        freq[0][i] += 1
         second_num = random()
-        j = 0 if second_num < strat_b else 1
+        if second_num < strat_b:
+            j = 0
+        else:
+            j = 1
+        freq[1][j] += 1
         win = pool[i][j]
-        summ += win
+        summary += win
+        # freq[i][j] += 1
         print(f'Game #{iteration+1}\tNumber A: {first_num}\tStrategy A: {i}\tNumber B: {second_num}\tStrategy B: {j}\t'
-              f'Win: {win}\tSummary win: {summ}\tMid: {summ / (iteration+1)}')
+              f'Win: {win}\tsummary win: {summary}\tMid: {summary / (iteration+1)}')
+    for i in range(len(freq)):
+        for j in range(len(freq[i])):
+            freq[i][j] /= limit
+    print(f'Frequency: {freq}')
 
 
 def main():
     strat_a = 9/14
-    strat_b = 1/7
+    strat_b = 6/7
     pool = [
         [11, 6],
         [9, 18]
