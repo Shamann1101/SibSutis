@@ -1,24 +1,26 @@
-from math import inf
+from math import fabs
+
+ACCURACY = 1e-5
 
 
 excluded_columns = []
 
 
 def find_minimal_m(arr, excluded_arr):
-    minimum = arr[0]
-    minimum_index = 0
+    minimum = max(arr)
+    minimum_index = arr.index(minimum)
     for i in range(len(arr)):
         if i in excluded_arr:
             continue
-        if arr[i] < minimum:
+        if arr[i] < minimum and arr[i] != 0:
             minimum = arr[i]
             minimum_index = i
     return minimum, minimum_index
 
 
 def find_minimal_co(arr):
-    minimum = inf
-    minimum_index = 0
+    minimum = max(arr)
+    minimum_index = arr.index(minimum)
     for i in range(len(arr)):
         if arr[i] < 0:
             continue
@@ -47,9 +49,12 @@ def transfiguration(source_data, index_row, index_col):
     data = source_data.copy()
     i_row = index_row.copy()
     i_col = index_col.copy()
+    print("Source data:")
+    print_array(data)
 
-    while not is_positive_list(data[-1][:-1]):
-        m_row = [i for i in data[-1]]
+    while not is_positive_list(data[-1][:-1]) or not is_positive_list(data[-2][:-1]):
+        ind = -1 if not is_positive_list(data[-1][:-1]) else -2
+        m_row = [i for i in data[ind]]
         minimum_m, maximum_m_index = find_minimal_m(m_row[:-1], excluded_columns)
         print("m_row:", m_row, minimum_m, maximum_m_index)
 
@@ -59,7 +64,8 @@ def transfiguration(source_data, index_row, index_col):
                 data[row].append(simplex)
             elif len(data[row]) == len(i_row) + 2:
                 if data[row][maximum_m_index] == 0:
-                    print("zero:", row, maximum_m_index)
+                    Exception("zero:", row, maximum_m_index)
+                    # print("zero:", row, maximum_m_index)
                 simplex = data[row][-2] / data[row][maximum_m_index]
                 data[row][-1] = simplex
             else:
@@ -77,6 +83,8 @@ def transfiguration(source_data, index_row, index_col):
                 if elem == maximum_m_index or elem in excluded_columns:
                     continue
                 data[row][elem] -= data[row][maximum_m_index] * data[minimum_co_index][elem] / data[minimum_co_index][maximum_m_index]
+                if fabs(data[row][elem]) < ACCURACY:
+                    data[row][elem] = 0
 
         base_value = data[minimum_co_index][maximum_m_index]
         for row in range(len(data)):
@@ -85,17 +93,17 @@ def transfiguration(source_data, index_row, index_col):
                     continue
                 elif row == minimum_co_index:
                     data[row][elem] /= base_value
+                    if fabs(data[row][elem]) < ACCURACY:
+                        data[row][elem] = 0
                 elif elem == maximum_m_index:
                     data[row][elem] = 0
 
-        tmp = i_row[maximum_m_index]
-        i_row[maximum_m_index] = i_col[minimum_co_index]
-        i_col[minimum_co_index] = tmp
+        print(f'Swap {i_row[maximum_m_index]} to {i_col[minimum_co_index]}')
+        i_row[maximum_m_index], i_col[minimum_co_index] = i_col[minimum_co_index], i_row[maximum_m_index]
         excluded_columns.append(maximum_m_index)
-        del tmp
 
-    print_array(data)
-    print(i_row, i_col)
+        print_array(data)
+        print(i_row, i_col)
     print("\n")
     return data, i_row, i_col
 
@@ -107,6 +115,14 @@ def main():
         [2, 5, 0, 0, -1, 20],
         [11, 1, 0, 0, 0, 0],
         [-12, -10, 1, 1, 1, -65]
+    ]
+
+    doris_data = [
+        [5, 3, -1, 0, 0, 30],
+        [2, 4, 0, -1, 0, 26],
+        [3, 11, 0, 0, -1, 54],
+        [5, 2, 0, 0, 0, 0],
+        [-10, -18, 1, 1, 1, -110]
     ]
 
     index_row = [i for i in range(5)]
