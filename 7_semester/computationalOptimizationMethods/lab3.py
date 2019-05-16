@@ -20,6 +20,7 @@ def get_g(x):
     return 5 * x[0] + 6 * x[1] - 60
 
 
+# TODO: Need to unset double alpha
 def get_alpha(k):
     alpha = [0, 0]
     g = get_g(list_x[k-1])
@@ -48,7 +49,7 @@ def get_f(k):
 
 
 def main():
-    list_alpha.append(0)
+    list_alpha.append([0, 0])
     list_x.append([6, 5])
     # list_x.append([10, 10])
     # print(get_alpha(1))
