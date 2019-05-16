@@ -56,7 +56,7 @@ def transfiguration(source_data, index_row, index_col):
         ind = -1 if not is_positive_list(data[-1][:-1]) else -2
         m_row = [i for i in data[ind]]
         minimum_m, maximum_m_index = find_minimal_m(m_row[:-1], excluded_columns)
-        print("m_row:", m_row, minimum_m, maximum_m_index)
+        # print("m_row:", m_row, minimum_m, maximum_m_index)
 
         for row in range(len(i_col)):
             if len(data[row]) == len(i_row) + 1:
@@ -65,7 +65,6 @@ def transfiguration(source_data, index_row, index_col):
             elif len(data[row]) == len(i_row) + 2:
                 if data[row][maximum_m_index] == 0:
                     Exception("zero:", row, maximum_m_index)
-                    # print("zero:", row, maximum_m_index)
                 simplex = data[row][-2] / data[row][maximum_m_index]
                 data[row][-1] = simplex
             else:
@@ -74,7 +73,7 @@ def transfiguration(source_data, index_row, index_col):
 
         m_col = [data[i][-1] for i in range(len(i_col))]
         minimum_co, minimum_co_index = find_minimal_co(m_col)
-        print("m_col:", m_col, minimum_co, minimum_co_index)
+        # print("m_col:", m_col, minimum_co, minimum_co_index)
 
         for row in range(len(data)):
             if row == minimum_co_index:
@@ -115,14 +114,6 @@ def main():
         [2, 5, 0, 0, -1, 20],
         [11, 1, 0, 0, 0, 0],
         [-12, -10, 1, 1, 1, -65]
-    ]
-
-    doris_data = [
-        [5, 3, -1, 0, 0, 30],
-        [2, 4, 0, -1, 0, 26],
-        [3, 11, 0, 0, -1, 54],
-        [5, 2, 0, 0, 0, 0],
-        [-10, -18, 1, 1, 1, -110]
     ]
 
     index_row = [i for i in range(5)]
