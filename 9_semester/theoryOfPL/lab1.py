@@ -1,7 +1,7 @@
 import re
-# from copy import copy
+from copy import copy
 
-_MAX_CHAIN_LENGTH = 10
+_MAX_CHAIN_LENGTH = 5
 
 
 class Rule:
@@ -49,9 +49,11 @@ class Chain:
             raise TypeError
 
         self.max_len = max_len
+        self._can_be_changed = False
+        if self.max_len > 0:
+            self._can_be_changed = True
         self._history = list()
         self._string = target
-        self._can_be_changed = True
 
     @property
     def can_be_changed(self):
@@ -84,12 +86,13 @@ class Chain:
         return str(self)
 
     def action(self, rule: str):
-        rule = rule.strip()
-        self._string = re.sub('([A-Z])', rule, self._string)
-        self._history.append(rule)
+        if self._can_be_changed:
+            rule = rule.strip()
+            self._string = re.sub('([A-Z])', rule, self._string)
+            self._history.append(rule)
 
         if len(re.findall('([A-Z])', self._string)) > 0 \
-                and len(self._string) < self.max_len:
+                and len(self._string) <= self.max_len:
             self._can_be_changed = True
         else:
             self._can_be_changed = False
@@ -118,12 +121,33 @@ def _manual(target: str, rules: dict, max_len=_MAX_CHAIN_LENGTH) -> Chain:
     return chain
 
 
-# TODO: Fix
-def _auto(chains: list, rules: dict, max_len=_MAX_CHAIN_LENGTH) -> list:
-    for chain in chains:
-        pass
+def _auto(chains: list, rules: dict) -> list:
+	work_list = list()
+	done_list = list()
 
-    return chains
+	for chain in chains:
+		if chain.can_be_changed:
+			symbol = chain.get_target_symbol()
+			for j in range(len(rules[symbol].rules)):
+				c = copy(chain)
+				c.action(rules[symbol].rules[int(j)])
+				if c.can_be_changed:
+					work_list.append(c)
+				else:
+					done_list.append(c)
+		else:
+			done_list.append(chain)
+
+	if len(work_list) != 0:
+		a = _auto(work_list, rules)
+		done_list.extend(a)
+
+	for chain in done_list:
+		r = re.findall('([A-Z])', chain.string)
+		if len(r) > 0:
+			done_list.remove(chain)
+
+	return done_list
 
 
 def _main():
@@ -150,7 +174,10 @@ def _main():
 
     # Mock
     if len(rules) == 0:
-        rules['S'] = Rule('S', ['0', '1', 'S0', 'S1', 'Sa', 'Sb', 'Sc'])
+        # rules['S'] = Rule('S', ['0', '1', 'S0', 'S1', 'Sa', 'Sb', 'Sc'])
+        rules['S'] = Rule('S', ['0A', '1A', ' '])
+        rules['A'] = Rule('A', ['0E', '1E'])
+        rules['E'] = Rule('E', ['0S', '1S'])
 
     try:
         r = list()
@@ -166,16 +193,17 @@ def _main():
     print(Rule.get_ntl())
     target = input('Input target symbol: ') or Rule.get_ntl()[0]
     print(rules)
-    # c = _manual(target=target, rules=rules)
+    chain_length = input('Chain length: ') or _MAX_CHAIN_LENGTH
+    # c = _manual(target=target, rules=rules, max_len=int(chain_length))
     # print('chain:')
     # print(c)
     # print('history:')
     # print(c.history)
 
     chains = list()
-    c = Chain(target, _MAX_CHAIN_LENGTH)
+    c = Chain(target, int(chain_length))
     chains.append(c)
-    cs = _auto(chains=chains, rules=rules, max_len=_MAX_CHAIN_LENGTH)
+    cs = _auto(chains=chains, rules=rules)
     print('cs:')
     print(cs)
 
