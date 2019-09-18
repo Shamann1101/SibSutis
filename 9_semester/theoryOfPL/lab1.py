@@ -1,5 +1,5 @@
-import re
 from copy import copy
+from re import findall, sub
 
 _MAX_CHAIN_LENGTH = 5
 
@@ -19,6 +19,9 @@ class Rule:
         self._nt = non_terminal
         self._rules = list(set(rules))
         self._ntl.append(non_terminal)
+
+    def __del__(self):
+        self._ntl.remove(self._nt)
 
     @property
     def rules(self):
@@ -88,17 +91,17 @@ class Chain:
     def action(self, rule: str):
         if self._can_be_changed:
             rule = rule.strip()
-            self._string = re.sub('([A-Z])', rule, self._string)
+            self._string = sub('([A-Z])', rule, self._string)
             self._history.append(rule)
 
-        if len(re.findall('([A-Z])', self._string)) > 0 \
+        if len(findall('([A-Z])', self._string)) > 0 \
                 and len(self._string) <= self.max_len:
             self._can_be_changed = True
         else:
             self._can_be_changed = False
 
     def get_target_symbol(self) -> str or bool:
-        r = re.findall('([A-Z])', self._string)
+        r = findall('([A-Z])', self._string)
         if len(r) == 1:
             return r[0]
         elif len(r) < 1:
@@ -122,32 +125,32 @@ def _manual(target: str, rules: dict, max_len=_MAX_CHAIN_LENGTH) -> Chain:
 
 
 def _auto(chains: list, rules: dict) -> list:
-	work_list = list()
-	done_list = list()
+    work_list = list()
+    done_list = list()
 
-	for chain in chains:
-		if chain.can_be_changed:
-			symbol = chain.get_target_symbol()
-			for j in range(len(rules[symbol].rules)):
-				c = copy(chain)
-				c.action(rules[symbol].rules[int(j)])
-				if c.can_be_changed:
-					work_list.append(c)
-				else:
-					done_list.append(c)
-		else:
-			done_list.append(chain)
+    for chain in chains:
+        if chain.can_be_changed:
+            symbol = chain.get_target_symbol()
+            for j in range(len(rules[symbol].rules)):
+                c = copy(chain)
+                c.action(rules[symbol].rules[int(j)])
+                if c.can_be_changed:
+                    work_list.append(c)
+                else:
+                    done_list.append(c)
+        else:
+            done_list.append(chain)
 
-	if len(work_list) != 0:
-		a = _auto(work_list, rules)
-		done_list.extend(a)
+    if len(work_list) != 0:
+        a = _auto(work_list, rules)
+        done_list.extend(a)
 
-	for chain in done_list:
-		r = re.findall('([A-Z])', chain.string)
-		if len(r) > 0:
-			done_list.remove(chain)
+    for chain in done_list:
+        r = findall('([A-Z])', chain.string)
+        if len(r) > 0:
+            done_list.remove(chain)
 
-	return done_list
+    return done_list
 
 
 def _main():
@@ -158,7 +161,7 @@ def _main():
         if bool(symbol) is False:
             break
         elif symbol in Rule.get_ntl() \
-                or symbol not in re.findall('([A-Z])', symbol) \
+                or symbol not in findall('([A-Z])', symbol) \
                 or len(symbol) > 1:
             continue
         while True:
@@ -166,7 +169,7 @@ def _main():
             if bool(rule) is False:
                 break
             else:
-                r = re.findall('([A-Z])', rule)
+                r = findall('([A-Z])', rule)
                 if len(r) <= 1:
                     current_rules.append(rule)
         if len(current_rules) > 0:
@@ -183,7 +186,7 @@ def _main():
         r = list()
         for rule in rules:
             for cur in rules[rule].rules:
-                r.extend(re.findall('([A-Z])', cur))
+                r.extend(findall('([A-Z])', cur))
         if len(set(r) - set(Rule.get_ntl())) > 0:
             raise ValueError
     except ValueError:
