@@ -1,7 +1,8 @@
 from struct import pack, unpack
 from sys import argv
 
-class BmpFile():
+
+class BmpFile:
     def __init__(self, f_path):
         self.f_path = f_path
         self.f_ref = open(f_path, "rb")
@@ -27,7 +28,7 @@ class BmpFile():
         self.important_colors = unpack("I", self.f_ref.read(4))[0]
 
         # Reading color table
-        self.f_ref.seek(self.dib_size+14)
+        self.f_ref.seek(self.dib_size + 14)
         self.palette = self.f_ref.read(self.bits_per_pixel * self.n_of_colors)
         # print("Current position = {}".format(self.f_ref.tell()))
         # Reading raw image data
@@ -64,27 +65,19 @@ class BmpFile():
 
     def transform_to_grey(self):
         mutable_table = bytearray(self.palette)
-        new_pallete = []
+        new_palette = []
 
         palette = list(_divide_chunks(mutable_table, 4))
 
         for color in palette:
             avg = int((color[0] + color[1] + color[2]) / 3)
             rgb = [avg] * 3 + [0]
-            new_pallete += rgb
-        
-        self.palette = bytes(new_pallete)
+            new_palette += rgb
 
-    def _get_pixel_row_offset(self, width):
-        offset = 0
-        while width % 4 != 0:
-            width += 1
-            offset += 1
+        self.palette = bytes(new_palette)
 
-        return offset
-
-    def draw_border_around(self, borderWidth):
-        offset = self._get_pixel_row_offset(self.width)
+    def draw_border_around(self, border_width):
+        offset = _get_pixel_row_offset(self.width)
         mutable_table = bytearray(self.raw_image_data)
         bitmap_counter = 0
 
@@ -93,43 +86,59 @@ class BmpFile():
         # print("[DEBUG] Len of actual pixmap = {}".format(len(mutable_table)))
         for y in range(0, self.height):
             for x in range(0, self.width):
-                if y < borderWidth or y >= self.height - borderWidth or x < borderWidth or x >= self.width - borderWidth:
+                if y < border_width \
+                        or y >= self.height - border_width \
+                        or x < border_width \
+                        or x >= self.width - border_width:
                     mutable_table[bitmap_counter] = 0
                     bitmap_counter += 1
                 else:
                     bitmap_counter += 1
-            if (offset > 0):
+            if offset > 0:
                 bitmap_counter += offset
         self.raw_image_data = bytes(mutable_table)
 
     def print_bmp_header_info(self):
         print("<BMP Header info>")
-        print (("Type: {}\n" + \
-            "File size: {}\n" + \
-            "Res1: {}\n" + \
-            "Res2: {}\n" + \
-            "Offset: {}" \
-            ).format(self.type, self.file_size, self.reserved1, self.reserved2, self.offset))
+        print(("Type: {}\n" +
+               "File size: {}\n" +
+               "Res1: {}\n" +
+               "Res2: {}\n" +
+               "Offset: {}"
+               ).format(self.type, self.file_size, self.reserved1, self.reserved2, self.offset))
         print("</BMP Header info>\n")
         print("<DIB Header info>")
-        print(("DIB size: {}\n" + \
-            "Width: {}\n" + \
-            "Height: {}\n" + \
-            "Color Planes: {}\n" + \
-            "Bits per pixel: {}\n" + \
-            "Compression Method: {}\n" + \
-            "Raw image size: {}\n" + \
-            "Horizontal resoultion: {}\n" + \
-            "Vertical resoultion: {}\n" + \
-            "# of Colors: {}\n" + \
-            "Important Colors:" \
-            ).format(self.dib_size, self.width, self.height, self.color_planes, self.bits_per_pixel, self.compression_type, self.raw_image_size, self.horizontal_resolution, self.vertical_resolution, self.n_of_colors, self.important_colors))
+        print(("DIB size: {}\n" +
+               "Width: {}\n" +
+               "Height: {}\n" +
+               "Color Planes: {}\n" +
+               "Bits per pixel: {}\n" +
+               "Compression Method: {}\n" +
+               "Raw image size: {}\n" +
+               "Horizontal resolution: {}\n" +
+               "Vertical resolution: {}\n" +
+               "# of Colors: {}\n" +
+               "Important Colors:"
+               ).format(self.dib_size, self.width, self.height, self.color_planes, self.bits_per_pixel,
+                        self.compression_type, self.raw_image_size, self.horizontal_resolution,
+                        self.vertical_resolution, self.n_of_colors, self.important_colors))
         print("</DIB Header info>")
 
-def _divide_chunks(l, n): 
+
+def _get_pixel_row_offset(width):
+    offset = 0
+    while width % 4 != 0:
+        width += 1
+        offset += 1
+
+    return offset
+
+
+def _divide_chunks(l, n):
     # looping till length l 
-    for i in range(0, len(l), n):  
-        yield l[i:i + n] 
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+
 
 def _main():
     file_name = "Carib256.bmp"
@@ -143,6 +152,7 @@ def _main():
     f = BmpFile(file_name)
     f.draw_border_around(15)
     f.save_to_file('border_' + file_name)
+
 
 if __name__ == "__main__":
     _main()
