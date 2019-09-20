@@ -95,7 +95,7 @@ class Chain:
             self._history.append(rule)
 
         if len(findall('([A-Z])', self._string)) > 0 \
-                and len(self._string) <= self.max_len:
+                and len(self._string) <= self.max_len + 1:
             self._can_be_changed = True
         else:
             self._can_be_changed = False
@@ -124,7 +124,7 @@ def _manual(target: str, rules: dict, max_len=_MAX_CHAIN_LENGTH) -> Chain:
     return chain
 
 
-def _auto(chains: list, rules: dict) -> list:
+def _iterate(chains: list, rules: dict) -> list:
     work_list = list()
     done_list = list()
 
@@ -142,7 +142,7 @@ def _auto(chains: list, rules: dict) -> list:
             done_list.append(chain)
 
     if len(work_list) != 0:
-        a = _auto(work_list, rules)
+        a = _iterate(work_list, rules)
         done_list.extend(a)
 
     for chain in done_list:
@@ -151,6 +151,16 @@ def _auto(chains: list, rules: dict) -> list:
             done_list.remove(chain)
 
     return done_list
+
+
+def _auto(chains: list, rules: dict) -> list:
+    result = _iterate(chains, rules)
+    for chain in result:
+        r = findall('([A-Z])', chain.string)
+        if len(r) > 0:
+            result.remove(chain)
+
+    return result
 
 
 def _main():
