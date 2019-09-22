@@ -4,24 +4,81 @@ from re import findall, sub
 _MAX_CHAIN_LENGTH = 5
 
 
+class CFG:
+    def __init__(self):
+        self._terminal = list()
+        self._non_terminal = list()
+        self._rules = dict()
+        self._target = str()
+
+    @property
+    def terminal(self):
+        return self._terminal
+
+    @terminal.setter
+    def terminal(self, value: list):
+        for item in value:
+            if not isinstance(item, str):
+                raise ValueError
+            item = item.lower()
+            if item not in self._terminal:
+                self._terminal.append(item)
+
+    @property
+    def non_terminal(self):
+        return self._non_terminal
+
+    @non_terminal.setter
+    def non_terminal(self, value: list):
+        for item in value:
+            if not isinstance(item, str):
+                raise ValueError
+            item = item.upper()
+            if item not in self._non_terminal:
+                self._non_terminal.append(item)
+
+    @property
+    def rules(self):
+        return self._rules
+
+    @rules.setter
+    def rules(self, value: dict):
+        for k, v in value:
+            if not isinstance(v, list) \
+                    or k not in self._non_terminal:
+                raise ValueError
+        self._rules = value
+
+    @property
+    def target(self):
+        return self._target
+
+    @target.setter
+    def target(self, value: str):
+        value = value.upper()
+        if value not in self._non_terminal:
+            raise ValueError
+        self._target = value
+
+
 class Rule:
-    _ntl = list()
-
-    def __init__(self, non_terminal, rules):
-        try:
-            if not isinstance(non_terminal, str):
-                raise TypeError
-            if not isinstance(rules, list):
-                raise TypeError
-        except TypeError:
-            print('Value is wrong type')
-
-        self._nt = non_terminal
+    def __init__(self, cfg: CFG, non_terminal: str, rules: list):
+        self._cfg = cfg
         self._rules = list(set(rules))
-        self._ntl.append(non_terminal)
 
-    def __del__(self):
-        self._ntl.remove(self._nt)
+        if non_terminal not in self._cfg.non_terminal:
+            print(non_terminal)
+            print(self._cfg.non_terminal)
+            raise ValueError
+        self._non_terminal = non_terminal
+
+        for rule in rules:
+            r = findall('([A-Z])', rule)
+            if 0 == len(r) > 1 \
+                    or (r and r[0] not in self._cfg.non_terminal):
+                raise ValueError
+
+        self._cfg.rules[self._non_terminal] = self._rules
 
     @property
     def rules(self):
@@ -31,19 +88,15 @@ class Rule:
     def rules(self, value):
         pass
 
-    @staticmethod
-    def get_ntl():
-        return Rule._ntl
-
     def __str__(self):
-        return '{}: {}'.format(self._nt, self._rules)
+        return '{}: {}'.format(self._non_terminal, self._rules)
 
     def __repr__(self):
         return str(self)
 
 
 class Chain:
-    def __init__(self, target, max_len):
+    def __init__(self, target: str, max_len: int):
         if not isinstance(target, str):
             raise TypeError
         elif len(target) > 1:
@@ -52,9 +105,7 @@ class Chain:
             raise TypeError
 
         self.max_len = max_len
-        self._can_be_changed = False
-        if self.max_len > 0:
-            self._can_be_changed = True
+        self._can_be_changed = True if self.max_len > 0 else False
         self._history = list()
         self._string = target
 
@@ -165,12 +216,18 @@ def _auto(chains: list, rules: dict) -> list:
 
 def _main():
     rules = dict()
+    # Mock
+    cfg = CFG()
+    cfg.terminal = ['0', '1', '']
+    cfg.non_terminal = ['S', 'A', 'E']
+    cfg.target = 'S'
     while True:
         current_rules = list()
         symbol = input('Non terminal symbol: ')
+        symbol = symbol.upper()
         if bool(symbol) is False:
             break
-        elif symbol in Rule.get_ntl() \
+        elif symbol in cfg.non_terminal \
                 or symbol not in findall('([A-Z])', symbol) \
                 or len(symbol) > 1:
             continue
@@ -183,28 +240,29 @@ def _main():
                 if len(r) <= 1:
                     current_rules.append(rule)
         if len(current_rules) > 0:
-            rules[symbol] = Rule(symbol, current_rules)
+            cfg.non_terminal.append(symbol)
+            rules[symbol] = Rule(cfg, symbol, current_rules)
 
     # Mock
     if len(rules) == 0:
         # rules['S'] = Rule('S', ['0', '1', 'S0', 'S1', 'Sa', 'Sb', 'Sc'])
-        rules['S'] = Rule('S', ['0A', '1A', ' '])
-        rules['A'] = Rule('A', ['0E', '1E'])
-        rules['E'] = Rule('E', ['0S', '1S'])
+        rules['S'] = Rule(cfg, 'S', ['0A', '1A', ' '])
+        rules['A'] = Rule(cfg, 'A', ['0E', '1E'])
+        rules['E'] = Rule(cfg, 'E', ['0S', '1S'])
 
     try:
         r = list()
         for rule in rules:
             for cur in rules[rule].rules:
                 r.extend(findall('([A-Z])', cur))
-        if len(set(r) - set(Rule.get_ntl())) > 0:
+        if len(set(r) - set(cfg.non_terminal)) > 0:
             raise ValueError
     except ValueError:
         print('Non terminal letter error')
         exit(1)
 
-    print(Rule.get_ntl())
-    target = input('Input target symbol: ') or Rule.get_ntl()[0]
+    print(cfg.non_terminal)
+    target = input('Input target symbol: ') or cfg.non_terminal[0]
     print(rules)
     chain_length = input('Chain length: ') or _MAX_CHAIN_LENGTH
     # c = _manual(target=target, rules=rules, max_len=int(chain_length))
