@@ -1,7 +1,7 @@
 from copy import copy
 from re import findall, sub
 
-_MAX_CHAIN_LENGTH = 5
+MAX_CHAIN_LENGTH = 5
 
 
 class CFG:
@@ -60,6 +60,42 @@ class CFG:
             raise ValueError
         self._target = value
 
+    def _set_terminal(self):
+        # FIXME
+        pass
+    # while True:
+    #     current_rules = list()
+    #     symbol = input('Non terminal symbol: ')
+    #     symbol = symbol.upper()
+    #     if bool(symbol) is False:
+    #         break
+    #     elif symbol not in cfg.non_terminal \
+    #             or symbol not in findall('([A-Z])', symbol) \
+    #             or len(symbol) > 1:
+    #         continue
+    #     while True:
+    #         rule = input('Input rule: ')
+    #         if bool(rule) is False:
+    #             break
+    #         elif rule not in cfg.terminal:
+    #             continue
+    #         else:
+    #             r = findall('([A-Z])', rule)
+    #             if len(r) <= 1:
+    #                 current_rules.append(rule)
+    #     if len(current_rules) > 0:
+    #         rules[symbol] = Rule(cfg, symbol, current_rules)
+
+    def generate_chains(self, chain_length: int) -> list:
+        chain = Chain(self, int(chain_length))
+        result = _iterate([chain], chain.cfg.rules)
+        for c in result:
+            r = findall('([A-Z])', c.string)
+            if len(r) > 0:
+                result.remove(c)
+
+        return result
+
 
 class Rule:
     def __init__(self, cfg: CFG, non_terminal: str, rules: list):
@@ -96,18 +132,26 @@ class Rule:
 
 
 class Chain:
-    def __init__(self, target: str, max_len: int):
-        if not isinstance(target, str):
-            raise TypeError
-        elif len(target) > 1:
-            raise ValueError
-        if not isinstance(max_len, int):
-            raise TypeError
-
+    def __init__(self, cfg: CFG, max_len: int):
+        self._cfg = cfg
         self.max_len = max_len
         self._can_be_changed = True if self.max_len > 0 else False
         self._history = list()
-        self._string = target
+        self._string = self._cfg.target
+
+    def __str__(self):
+        return self._string
+
+    def __repr__(self):
+        return str(self)
+
+    @property
+    def cfg(self):
+        return self._cfg
+
+    @cfg.setter
+    def cfg(self, value):
+        pass
 
     @property
     def can_be_changed(self):
@@ -133,12 +177,6 @@ class Chain:
     def history(self, value):
         pass
 
-    def __str__(self):
-        return self._string
-
-    def __repr__(self):
-        return str(self)
-
     def action(self, rule: str):
         if self._can_be_changed:
             rule = rule.strip()
@@ -161,17 +199,17 @@ class Chain:
             raise ValueError
 
 
-def _manual(target: str, rules: dict, max_len=_MAX_CHAIN_LENGTH) -> Chain:
-    chain = Chain(target, max_len)
+def _manual(cfg: CFG, max_len=MAX_CHAIN_LENGTH) -> Chain:
+    chain = Chain(cfg, max_len)
     while chain.can_be_changed:
         symbol = chain.get_target_symbol()
         if symbol is False:
             break
-        for j in range(len(rules[symbol].rules)):
-            print('[{}]: {}'.format(j, rules[symbol].rules[j]))
+        for j in range(len(cfg.rules[symbol].rules)):
+            print('[{}]: {}'.format(j, cfg.rules[symbol].rules[j]))
         print(chain)
         n = input('Choose: ')
-        chain.action(rules[symbol].rules[int(n)])
+        chain.action(cfg.rules[symbol].rules[int(n)])
     return chain
 
 
@@ -204,77 +242,31 @@ def _iterate(chains: list, rules: dict) -> list:
     return done_list
 
 
-def _auto(chains: list, rules: dict) -> list:
-    result = _iterate(chains, rules)
-    for chain in result:
-        r = findall('([A-Z])', chain.string)
-        if len(r) > 0:
-            result.remove(chain)
-
-    return result
-
-
 def _main():
-    rules = dict()
     # Mock
     cfg = CFG()
-    cfg.terminal = ['0', '1', '']
+    cfg.terminal = ['0', '1', ' ']
     cfg.non_terminal = ['S', 'A', 'E']
     cfg.target = 'S'
-    while True:
-        current_rules = list()
-        symbol = input('Non terminal symbol: ')
-        symbol = symbol.upper()
-        if bool(symbol) is False:
-            break
-        elif symbol in cfg.non_terminal \
-                or symbol not in findall('([A-Z])', symbol) \
-                or len(symbol) > 1:
-            continue
-        while True:
-            rule = input('Input rule: ')
-            if bool(rule) is False:
-                break
-            else:
-                r = findall('([A-Z])', rule)
-                if len(r) <= 1:
-                    current_rules.append(rule)
-        if len(current_rules) > 0:
-            cfg.non_terminal.append(symbol)
-            rules[symbol] = Rule(cfg, symbol, current_rules)
 
-    # Mock
-    if len(rules) == 0:
-        # rules['S'] = Rule('S', ['0', '1', 'S0', 'S1', 'Sa', 'Sb', 'Sc'])
-        rules['S'] = Rule(cfg, 'S', ['0A', '1A', ' '])
-        rules['A'] = Rule(cfg, 'A', ['0E', '1E'])
-        rules['E'] = Rule(cfg, 'E', ['0S', '1S'])
-
-    try:
-        r = list()
-        for rule in rules:
-            for cur in rules[rule].rules:
-                r.extend(findall('([A-Z])', cur))
-        if len(set(r) - set(cfg.non_terminal)) > 0:
-            raise ValueError
-    except ValueError:
-        print('Non terminal letter error')
-        exit(1)
+    # cfg.rules['S'] = Rule(cfg, 'S', ['0', '1', 'S0', 'S1', 'Sa', 'Sb', 'Sc'])
+    cfg.rules['S'] = Rule(cfg, 'S', ['0A', '1A', ' '])
+    cfg.rules['A'] = Rule(cfg, 'A', ['0E', '1E'])
+    cfg.rules['E'] = Rule(cfg, 'E', ['0S', '1S'])
 
     print(cfg.non_terminal)
     target = input('Input target symbol: ') or cfg.non_terminal[0]
-    print(rules)
-    chain_length = input('Chain length: ') or _MAX_CHAIN_LENGTH
-    # c = _manual(target=target, rules=rules, max_len=int(chain_length))
-    # print('chain:')
-    # print(c)
-    # print('history:')
-    # print(c.history)
+    cfg.target = target.upper()
+    print(cfg.rules)
+    chain_length = input('Chain length: ') or MAX_CHAIN_LENGTH
 
-    chains = list()
-    c = Chain(target, int(chain_length))
-    chains.append(c)
-    cs = _auto(chains=chains, rules=rules)
+    # chain = _manual(cfg=cfg, max_len=int(chain_length))
+    # print('chain:')
+    # print(chain)
+    # print('history:')
+    # print(chain.history)
+
+    cs = cfg.generate_chains(chain_length)
     print('cs:')
     print(cs)
 
