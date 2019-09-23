@@ -59,7 +59,7 @@ class DFSM:
                         or not isinstance(rules[action], str) \
                         or action.lower() not in self._alphabet \
                         or (target not in self._state_name_list
-                            and target != ' '):
+                            and target != ''):
                     raise ValueError
                 self._state_dict[state][action.lower()] = target
 
@@ -152,7 +152,8 @@ class DFSM:
                     action = input('Action [{}]: '.format(target))
                     action = action.upper()
                     if len(action) > 1 \
-                            or (action not in self._state_name_list and action != ' '):
+                            or (action not in self._state_name_list
+                                and action != ''):
                         continue
                     state.set_rule(target, action)
                     break
@@ -287,7 +288,7 @@ def _main():
     dfsm.alphabet = ['x', 'y', 'z']
     dfsm.initial_state = 'a'
     dfsm.final_state = 'c'
-    dfsm.state_dict = {'a': {'x': 'b', 'y': ' ', 'z': ' '},
+    dfsm.state_dict = {'a': {'x': 'b', 'y': '', 'z': ''},
                        'b': {'x': 'c', 'y': 'c', 'z': 'c'},
                        'c': {'x': 'b', 'y': 'b', 'z': 'b'}}
     chain = Chain(dfsm, ['x', 'x', 'x', 'x'])

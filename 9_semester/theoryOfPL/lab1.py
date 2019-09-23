@@ -220,6 +220,8 @@ def _iterate(chains: list, rules: dict) -> list:
     for chain in chains:
         if chain.can_be_changed:
             symbol = chain.get_target_symbol()
+            if len(rules[symbol].rules) == 0:
+                rules[symbol].rules.append('')
             for j in range(len(rules[symbol].rules)):
                 c = copy(chain)
                 c.action(rules[symbol].rules[int(j)])
@@ -246,13 +248,14 @@ def _main():
     # Mock
     cfg = CFG()
     cfg.terminal = ['0', '1', ' ']
-    cfg.non_terminal = ['S', 'A', 'E']
+    cfg.non_terminal = ['S', 'A', 'E', 'F']
     cfg.target = 'S'
 
     # cfg.rules['S'] = Rule(cfg, 'S', ['0', '1', 'S0', 'S1', 'Sa', 'Sb', 'Sc'])
-    cfg.rules['S'] = Rule(cfg, 'S', ['0A', '1A', ' '])
+    cfg.rules['S'] = Rule(cfg, 'S', ['0A', '1A', 'F'])
     cfg.rules['A'] = Rule(cfg, 'A', ['0E', '1E'])
     cfg.rules['E'] = Rule(cfg, 'E', ['0S', '1S'])
+    cfg.rules['F'] = Rule(cfg, 'F', [])
 
     print(cfg.non_terminal)
     target = input('Input target symbol: ') or cfg.non_terminal[0]
@@ -266,9 +269,9 @@ def _main():
     # print('history:')
     # print(chain.history)
 
-    cs = cfg.generate_chains(chain_length)
-    print('cs:')
-    print(cs)
+    chains = cfg.generate_chains(chain_length)
+    print('chains:')
+    print(chains)
 
 
 if __name__ == '__main__':
