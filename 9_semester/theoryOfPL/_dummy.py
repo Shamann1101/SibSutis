@@ -42,11 +42,14 @@ class DFSM:
                 print('Current state: {}, current chain: {}, stack: {}'.format(current_state,
                                                                                current_chain,
                                                                                self.stack_start))
+            rule_found = False
             for f in self.functions:
-                print('function:', f)
+                rule_found = False
+                # print('function:', f)  # FIXME
                 if current_state == f[0] \
                         and current_chain[0] == f[1] \
                         and self.stack_start[0] == f[2]:
+                    rule_found = True
                     current_chain = current_chain[1:]
                     print('Applying rule:', f)
                     current_state = f[3]
@@ -60,6 +63,9 @@ class DFSM:
                         self.stack_start = self.stack_start[1:]
                         skip_flag = True
                     break
+            if rule_found is False:
+                print('Rule not found')
+                exit(0)
             print('New state: {}'.format(current_state))
 
         if current_state not in self.end_states:
@@ -74,25 +80,24 @@ class DFSM:
         with open(path, "r") as f:
             contents = f.read()
             machine = re.findall('{.+?}|[aA-zZ]', contents)
-            print('machine:', machine)  # FIXME
+            # print('machine:', machine)  # FIXME
             # ['P', '{p,q}', '{0,1}', '{Z,0}', 'S', 'p', 'Z', '{p}']
-            self.states = machine[0][1:-1].split(',')
+            self.states = machine[2][1:-1].split(',')
             self.alphabet = machine[1][1:-1].split(',')
-            # self.start = machine[2]  # NOTE: WTF?
             self.stack_alphabet = machine[3][1:-1].split(',')
-            self.start = machine[5]
-            self.stack_start = machine[6]
-            if len(machine[7]) == 3:
-                self.end_states = machine[7][1:-1]
+            self.start = machine[4]
+            self.stack_start = machine[5]
+            if len(machine[6]) == 3:
+                self.end_states = machine[6][1:-1]
             else:
-                self.end_states = machine[7][1:-1].split(',')
+                self.end_states = machine[6][1:-1].split(',')
             func = re.findall('.+', contents)
-            print('func:', func)  # FIXME
+            # print('func:', func)  # FIXME
             for i in range(1, len(func)):
                 self.functions.append(func[i].split(' '))
 
 
 m = DFSM()
 m.get_machine()
-print(m)  # FIXME
-# m.check_chain('00001111')
+# print(m)  # FIXME
+m.check_chain('00001111')
