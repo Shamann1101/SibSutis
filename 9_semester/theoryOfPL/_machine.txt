@@ -1,7 +1,0 @@
-P=({p,q},{0,1},{Z,0},p,Z,{p})
-p 0 Z p 0Z
-p 0 0 p 00
-p 1 0 q L
-p L Z L L
-q L Z q L
-q 1 0 p L
