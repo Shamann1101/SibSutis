@@ -76,7 +76,7 @@ class Chain:
                     self.string = self.string[1:]
                     self.history.append(rule)
                     self.state = rule.state_new
-                    if rule.stack_new != rule.l:
+                    if rule.stack_new != rule.state_l:
                         if len(rule.stack_new) == 1:
                             self.stack = rule.stack_new + self.stack
                         else:
