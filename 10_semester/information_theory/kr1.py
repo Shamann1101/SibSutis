@@ -4,6 +4,7 @@ from random import random
 import numpy as np
 
 FILE_SIZE = 10_000
+EXCLUDE_SYMBOLS = ('.', ',', '!', '?', '-', '^', ':', ';', '(', ')', ' ', '"', '\'', '\n', '\t')
 
 
 def _get_result_vector(_dict: dict) -> tuple:
@@ -64,7 +65,10 @@ def generate_file_2(title='file_2.txt', length=FILE_SIZE):
 
 def entropy_count(filename: str, size=1) -> float:
     with open(filename, 'r') as f:
-        file_str = f.read()
+        file_str = f.read().lower()
+
+    for symbol in EXCLUDE_SYMBOLS:
+        file_str = file_str.replace(symbol, '+')
 
     symbols_list = []
     for i in range(len(file_str) - size + 1):
@@ -86,3 +90,4 @@ if __name__ == '__main__':
 
     print(entropy_count('file_1.txt'))
     print(entropy_count('file_2.txt'))
+    print(entropy_count('file_3.txt'))
