@@ -1,5 +1,5 @@
-import random
 from os import stat
+from random import random
 
 import numpy as np
 
@@ -27,7 +27,7 @@ def _get_result_vector(_dict: dict) -> tuple:
 
 
 def _get_random_symbol(_dict: dict) -> str:
-    x = random.random()
+    x = random()
     vector = _get_result_vector(_dict)
     for pair in vector:
         if x < pair[0]:
@@ -62,15 +62,13 @@ def generate_file_2(title='file_2.txt', length=FILE_SIZE):
             f.write(_get_random_symbol(letters))
 
 
-def entropy_count(filename: str) -> float:
-    symbols_list = []
-
+def entropy_count(filename: str, size=1) -> float:
     with open(filename, 'r') as f:
-        while True:
-            symbol = f.read(1)
-            if not symbol:
-                break
-            symbols_list.append(symbol)
+        file_str = f.read()
+
+    symbols_list = []
+    for i in range(len(file_str) - size + 1):
+        symbols_list.append(file_str[i:i + size])
 
     symbols = np.array(symbols_list)
 
