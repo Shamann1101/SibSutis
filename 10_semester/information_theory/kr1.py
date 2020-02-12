@@ -4,7 +4,7 @@ from random import random
 import numpy as np
 
 FILE_SIZE = 10_000
-EXCLUDE_SYMBOLS = ('.', ',', '!', '?', '-', '^', ':', ';', '(', ')', ' ', '"', '\'', '\n', '\t')
+EXCLUDE_SYMBOLS = ('.', ',', '!', '?', '-', '^', ':', ';', '(', ')', '"', '\'', '\n', '\t')
 
 
 def _get_result_vector(_dict: dict) -> tuple:
@@ -79,7 +79,7 @@ def entropy_count(filename: str, size=1) -> float:
     _, counts = np.unique(symbols, return_counts=True)
     p = counts / np.sum(counts)
 
-    H = -np.sum(p * np.log2(p))
+    H = -np.sum(p * np.log2(p)) / size
 
     return H
 
