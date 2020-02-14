@@ -124,15 +124,36 @@ def _get_alphabet(filename: str, size=1) -> dict:
     return _dict
 
 
+def hoffman(_in: dict or list):
+    if type(_in) == dict:
+        _in = list(_in.values())
+        _in.sort(reverse=True)
+    elif type(_in) != list:
+        raise TypeError
+    print('in', _in)
+    if len(_in) > 2:
+        summation = np.sum(_in[-2:])
+        print('summation', summation)
+        _in[-2] = summation
+        _in.pop()
+        _in.sort(reverse=True)
+        index = _in.index(summation)
+        print('in', _in)
+        hoffman(_in)
+        print('index', index)
+    return _in  # FIXME
+
+
 if __name__ == '__main__':
-    generate_file_1(FILENAME_1)
-    generate_file_2(FILENAME_2)
+    # generate_file_1(FILENAME_1)
+    # generate_file_2(FILENAME_2)
+    #
+    # print('entropy of file_1.txt', entropy_count(FILENAME_1))
+    # print('redundancy of file_1.txt', redundancy_count(FILENAME_1))
+    # print('entropy of file_2.txt', entropy_count(FILENAME_2))
+    # print('redundancy of file_2.txt', redundancy_count(FILENAME_2))
+    # print('entropy of file_3.txt', entropy_count(FILENAME_3))
+    # print('redundancy of file_3.txt', redundancy_count(FILENAME_3))
 
-    print('entropy of file_1.txt', entropy_count(FILENAME_1))
-    print('redundancy of file_1.txt', redundancy_count(FILENAME_1))
-    print('entropy of file_2.txt', entropy_count(FILENAME_2))
-    print('redundancy of file_2.txt', redundancy_count(FILENAME_2))
-    print('entropy of file_3.txt', entropy_count(FILENAME_3))
-    print('redundancy of file_3.txt', redundancy_count(FILENAME_3))
-
-    print(_get_alphabet(FILENAME_1))
+    # print(_get_alphabet(FILENAME_1))
+    hoffman([0.36, 0.18, 0.18, 0.12, 0.09, 0.07])
