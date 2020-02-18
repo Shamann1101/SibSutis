@@ -7,7 +7,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define PORT 4444
+#define PORT 8080
 
 int main() {
 
@@ -39,7 +39,7 @@ int main() {
         printf("[-]Error in binding.\n");
         exit(1);
     }
-    printf("[+]Bind to port %d\n", 4444);
+    printf("[+]Bind to port %d\n", PORT);
 
     if (listen(sockfd, 10) == 0) {
         printf("[+]Listening....\n");
@@ -60,7 +60,7 @@ int main() {
 
             while (1) {
                 recv(newSocket, buffer, 1024, 0);
-                if (strcmp(buffer, ":exit") == 0) {
+                if (strcmp(buffer, "") == 0) {
                     printf("Disconnected from %s:%d\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port));
                     break;
                 } else {

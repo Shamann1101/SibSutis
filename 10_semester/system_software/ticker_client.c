@@ -16,6 +16,9 @@ void func(int sockfd) {
         printf("Enter the string : ");
         int ia;
         scanf("%d", &ia);
+        if (ia < 0) {
+            return;
+        }
         for (int i = 0; i < ia; i++) {
             sleep(ia);
             sprintf(buff, "%d\n", ia);
