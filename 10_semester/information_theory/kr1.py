@@ -1,3 +1,5 @@
+from collections import Counter
+from heapq import heappush, heappop, heapify
 from os import stat
 from random import random
 
@@ -83,23 +85,24 @@ def _get_symbols_array(file_str: str, size: int) -> np.ndarray:
     return symbols
 
 
-def entropy_count(filename: str, size=1, print_symbols=False) -> float:
+def entropy_count(filename: str, size=1, print_log=False) -> float:
     file_str = _string_prepare(filename)
     symbols = _get_symbols_array(file_str, size)
 
     unique_symbols, counts = np.unique(symbols, return_counts=True)
 
-    if print_symbols:
-        print('for file {} get symbols: {}'.format(filename, unique_symbols))
-
     p = counts / np.sum(counts)
 
     H = -np.sum(p * np.log2(p)) / size
 
+    if print_log:
+        print('for file {} get symbols: {}'.format(filename, unique_symbols))
+        print('entropy of {}: {}'.format(filename, H))
+
     return H
 
 
-def redundancy_count(filename: str, size=1) -> float:
+def redundancy_count(filename: str, size=1, print_log=False) -> float:
     file_str = _string_prepare(filename)
     symbols = _get_symbols_array(file_str, size)
 
@@ -109,51 +112,65 @@ def redundancy_count(filename: str, size=1) -> float:
     H_max = np.log2(len(counts))
     r = 1. - (H / H_max)
 
+    if print_log:
+        print('redundancy of {}: {}'.format(filename, r))
+
     return r
 
 
-def _get_alphabet(filename: str, size=1) -> dict:
+def huffman(file_str: str, print_log=False) -> dict:
+    symbols = Counter(file_str)
+    heap = [[wt, [sym, ""]] for sym, wt in symbols.items()]
+    heapify(heap)
+    while len(heap) > 1:
+        lo = heappop(heap)
+        hi = heappop(heap)
+        for pair in lo[1:]:
+            pair[1] = '0' + pair[1]
+        for pair in hi[1:]:
+            pair[1] = '1' + pair[1]
+        heappush(heap, [lo[0] + hi[0]] + lo[1:] + hi[1:])
+
+    huff = dict(sorted(heappop(heap)[1:], key=lambda p: (len(p[-1]), p), reverse=True))
+
+    if print_log:
+        print('huffman codes: {}'.format(huff))
+
+    return huff
+
+
+def huffman_encode_file(filename: str, file_prefix='encoded_', print_log=False) -> str:
     file_str = _string_prepare(filename)
-    symbols = _get_symbols_array(file_str, size)
+    huff = huffman(file_str, print_log=print_log)
 
-    unique_symbols, counts = np.unique(symbols, return_counts=True)
-    summation = np.sum(counts)
+    if [i for i in ['0', '1'] if i in huff]:
+        if '0' in huff:
+            file_str = file_str.replace('0', 'O')
+            huff['O'] = huff.pop('0')
+        if '1' in huff:
+            file_str = file_str.replace('1', 'I')
+            huff['I'] = huff.pop('1')
 
-    _dict = {unique_symbols[i]: counts[i] / summation for i in range(len(unique_symbols))}
+    for symbol in huff:
+        file_str = file_str.replace(symbol, huff[symbol])
 
-    return _dict
+    with open(file_prefix + filename, 'w+') as f:
+        f.write(file_str)
 
-
-def hoffman(_in: dict or list):
-    if type(_in) == dict:
-        _in = list(_in.values())
-        _in.sort(reverse=True)
-    elif type(_in) != list:
-        raise TypeError
-    print('in', _in)
-    if len(_in) > 2:
-        summation = np.sum(_in[-2:])
-        print('summation', summation)
-        _in[-2] = summation
-        _in.pop()
-        _in.sort(reverse=True)
-        index = _in.index(summation)
-        print('in', _in)
-        hoffman(_in)
-        print('index', index)
-    return _in  # FIXME
+    return file_prefix + filename
 
 
 if __name__ == '__main__':
     # generate_file_1(FILENAME_1)
     # generate_file_2(FILENAME_2)
-    #
-    # print('entropy of file_1.txt', entropy_count(FILENAME_1))
-    # print('redundancy of file_1.txt', redundancy_count(FILENAME_1))
-    # print('entropy of file_2.txt', entropy_count(FILENAME_2))
-    # print('redundancy of file_2.txt', redundancy_count(FILENAME_2))
-    # print('entropy of file_3.txt', entropy_count(FILENAME_3))
-    # print('redundancy of file_3.txt', redundancy_count(FILENAME_3))
 
-    # print(_get_alphabet(FILENAME_1))
-    hoffman([0.36, 0.18, 0.18, 0.12, 0.09, 0.07])
+    str_len = 1
+    print_log = True
+
+    for filename in [FILENAME_1, FILENAME_2, FILENAME_3]:
+        entropy_count(filename, size=str_len, print_log=print_log)
+        redundancy_count(filename, size=str_len, print_log=print_log)
+        new_filename = huffman_encode_file(filename, print_log=print_log)
+        entropy_count(new_filename, size=str_len, print_log=print_log)
+        redundancy_count(new_filename, size=str_len, print_log=print_log)
+        print()
