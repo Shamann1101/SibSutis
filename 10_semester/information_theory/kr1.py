@@ -139,9 +139,24 @@ def huffman(file_str: str, print_log=False) -> dict:
     return huff
 
 
-def huffman_encode_file(filename: str, file_prefix='encoded_', print_log=False) -> str:
+def redundancy_encoding_count(_dict: dict, entropy: float, print_log=False) -> float:
+    lengths_array = np.array([len(i) for i in _dict.values()])
+    length, counts = np.unique(lengths_array, return_counts=True)
+    p = counts / np.sum(counts) * length
+    p_sum = np.sum(p)
+    r = p_sum - entropy
+
+    if print_log:
+        print('average code length: {}, redundancy: {}'.format(p_sum, r))
+
+    return r
+
+
+def huffman_encode_file(filename: str, file_prefix='encoded_', huff=None, print_log=False) -> str:
     file_str = _string_prepare(filename)
-    huff = huffman(file_str, print_log=print_log)
+
+    if huff is None:
+        huff = huffman(file_str, print_log=print_log)
 
     if [i for i in ['0', '1'] if i in huff]:
         if '0' in huff:
@@ -168,9 +183,12 @@ if __name__ == '__main__':
     print_log = True
 
     for filename in [FILENAME_1, FILENAME_2, FILENAME_3]:
-        entropy_count(filename, size=str_len, print_log=print_log)
+        entropy = entropy_count(filename, size=str_len, print_log=print_log)
         redundancy_count(filename, size=str_len, print_log=print_log)
-        new_filename = huffman_encode_file(filename, print_log=print_log)
+        huff = huffman(_string_prepare(filename), print_log=print_log)
+        new_filename = huffman_encode_file(filename, huff=huff, print_log=print_log)
+        redundancy_encoding_count(huff, entropy, print_log=print_log)
         entropy_count(new_filename, size=str_len, print_log=print_log)
         redundancy_count(new_filename, size=str_len, print_log=print_log)
-        print()
+        if print_log:
+            print()
