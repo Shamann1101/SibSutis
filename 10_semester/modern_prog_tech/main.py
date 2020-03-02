@@ -2,7 +2,7 @@ import sys
 
 from PyQt5 import QtWidgets
 
-import calculator_design as design
+import rgr_calculator_design as design
 
 
 # TODO: Memory using
