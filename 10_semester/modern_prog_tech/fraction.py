@@ -11,10 +11,10 @@ class Fraction:
         if type(numerator) == str:
             str_value = str(numerator).strip()
             values = str_value.split('/')
-            if len(values) != 2:
+            if len(values) > 2:
                 raise ValueError(numerator)
             numerator = int(values[0])
-            denominator = int(values[1])
+            denominator = int(values[1]) if len(values) == 2 else 1
         self.numerator = numerator  # числитель
         self._denominator = denominator  # знаменатель
 
@@ -73,5 +73,5 @@ class Fraction:
         factor = value / self._denominator
         if factor != int(factor):
             raise ValueError(factor)
-        self.numerator *= factor
+        self.numerator = int(factor * self.numerator)
         self._denominator = value
