@@ -1,24 +1,30 @@
-from enum import Enum
+from enum import Enum, auto
 
 
 class InstitutionType(Enum):
-    SCHOOL = 1
-    LYCEUM = 2
-    GYMNASIUM = 3
-    SPORT = 4
-    OLYMPIC = 5
+    SCHOOL = auto()
+    LYCEUM = auto()
+    GYMNASIUM = auto()
+    SPORT = auto()
+    OLYMPIC = auto()
+
+    def __str__(self):
+        return self.name
 
 
 class Institution:
     institution_count = 0
 
-    def __init__(self, number=None, institution_type=None):
+    def __init__(self, number: int = None, institution_type: 'InstitutionType' = None):
         self.number_of_students = 0
         Institution.institution_count += 1
         self.number = number
         if institution_type is not None and not isinstance(institution_type, InstitutionType):
             raise ValueError(institution_type)
         self._institution_type = institution_type
+
+    def __del__(self):
+        Institution.institution_count -= 1
 
     @property
     def institution_type(self) -> 'InstitutionType':
@@ -36,10 +42,17 @@ class EducationInstitution(Institution):
     graduates_all = 0
     graduates_in_college_all = 0
 
-    def __init__(self, number=None, institution_type=None):
+    def __init__(self, number: int = None, institution_type: 'InstitutionType' = None):
         self._check_allowed_type(institution_type)
         super().__init__(number=number, institution_type=institution_type)
         self._graduates = dict()
+
+    def __del__(self):
+        graduates = sum([self.graduates[year]['graduates'] for year in self.graduates])
+        EducationInstitution.graduates_all -= graduates
+        graduates_college = sum([self.graduates[year]['graduates_college'] for year in self.graduates])
+        EducationInstitution.graduates_in_college_all -= graduates_college
+        super().__del__()
 
     @classmethod
     def _check_allowed_type(cls, value: 'InstitutionType'):
@@ -70,7 +83,16 @@ class EducationInstitution(Institution):
 
     @property
     def graduates_percent(self) -> float:
-        return self.graduates_in_college_all / self.graduates_all
+        graduates = sum([self.graduates[year]['graduates'] for year in self.graduates])
+        graduates_college = sum([self.graduates[year]['graduates_college'] for year in self.graduates])
+        return graduates_college / graduates
+
+    @classmethod
+    def graduates_percent_all(cls) -> float:
+        return cls.graduates_in_college_all / cls.graduates_all
+
+    def print_graduates_percent(self):
+        print('graduates percent of {} {}: {:.2%}'.format(self.institution_type, self.number, self.graduates_percent))
 
 
 class SportInstitution(Institution):
@@ -81,6 +103,10 @@ class SportInstitution(Institution):
         self._check_allowed_type(institution_type)
         super().__init__(number=number, institution_type=institution_type)
         self._master_of_sport = 0
+
+    def __del__(self):
+        SportInstitution.master_of_sport_all -= self._master_of_sport
+        super().__del__()
 
     @classmethod
     def _check_allowed_type(cls, value: 'InstitutionType'):
@@ -102,5 +128,7 @@ class SportInstitution(Institution):
 
     @master_of_sport.setter
     def master_of_sport(self, value: int):
+        if value > self.number_of_students:
+            raise ValueError(value)
         SportInstitution.master_of_sport_all += self._master_of_sport + value
         self._master_of_sport = value
