@@ -7,7 +7,6 @@ from calculator_controller import CalculatorController
 
 
 # TODO: Add switch to lastLineEdit
-# TODO: Add 'About' window
 
 
 class CalculatorApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
@@ -17,6 +16,7 @@ class CalculatorApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.lastLineEdit = self.lineEdit_first
 
         self.calc = CalculatorController()
+        self.actionAbout.triggered.connect(self.actionAbout_action)
         # self.lineEdit_first.selectedText.connect(self.lineEdit_first_action)
 
         self.btnResult.clicked.connect(self.btnResult_action)
@@ -25,6 +25,13 @@ class CalculatorApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
             action = getattr(self, '{}_action'.format(button.objectName()), None)
             if action:
                 button.clicked.connect(action)
+
+    def actionAbout_action(self):
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(QtWidgets.QMessageBox.Information)
+        msg.setInformativeText("Writen by Shm")
+        msg.setWindowTitle("CalculatorApp demo")
+        msg.exec_()
 
     def lineEdit_first_action(self):
         self.lastLineEdit = self.lineEdit_first
