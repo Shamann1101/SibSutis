@@ -215,7 +215,7 @@
      <x>0</x>
      <y>0</y>
      <width>350</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHelp">
@@ -232,6 +232,31 @@
    </property>
   </action>
  </widget>
+ <tabstops>
+  <tabstop>lineEdit_first</tabstop>
+  <tabstop>lineEdit_second</tabstop>
+  <tabstop>radioDiv</tabstop>
+  <tabstop>radioMul</tabstop>
+  <tabstop>radioSub</tabstop>
+  <tabstop>radioAdd</tabstop>
+  <tabstop>btnResult</tabstop>
+  <tabstop>lineEdit_result</tabstop>
+  <tabstop>btnBS</tabstop>
+  <tabstop>btnCE</tabstop>
+  <tabstop>btnC0</tabstop>
+  <tabstop>btn7</tabstop>
+  <tabstop>btn8</tabstop>
+  <tabstop>btn9</tabstop>
+  <tabstop>btn4</tabstop>
+  <tabstop>btn5</tabstop>
+  <tabstop>btn6</tabstop>
+  <tabstop>btn1</tabstop>
+  <tabstop>btn2</tabstop>
+  <tabstop>btn3</tabstop>
+  <tabstop>btn0</tabstop>
+  <tabstop>btnSign</tabstop>
+  <tabstop>btnSlash</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
  <buttongroups>
