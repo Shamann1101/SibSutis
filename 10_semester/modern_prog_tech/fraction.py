@@ -15,9 +15,12 @@ class Fraction:
                 raise ValueError(numerator)
             numerator = int(values[0])
             denominator = int(values[1]) if len(values) == 2 else 1
-        self.numerator = numerator  # числитель
+        self._numerator = numerator  # числитель
+        if denominator == 0:
+            raise ValueError(denominator)
         self._denominator = denominator  # знаменатель
 
+        self.reduce_fraction()
         self._update_sign()
 
     def __str__(self):
@@ -54,13 +57,21 @@ class Fraction:
 
     def _update_sign(self):
         if self._denominator < 0:
-            self.numerator *= -1
+            self._numerator *= -1
             self._denominator *= -1
 
     def reduce_fraction(self):
-        gcd = math.gcd(self.numerator, self._denominator)
-        self.numerator /= gcd
-        self._denominator /= gcd
+        gcd = math.gcd(self._numerator, self._denominator)
+        self._numerator = int(self._numerator / gcd)
+        self._denominator = int(self._denominator / gcd)
+
+    @property
+    def numerator(self):
+        return self._numerator
+
+    @numerator.setter
+    def numerator(self, value: int):
+        self._numerator = value
 
     @property
     def denominator(self):
@@ -68,10 +79,13 @@ class Fraction:
 
     @denominator.setter
     def denominator(self, value: int):
+        if value == 0:
+            raise ValueError(f'denominator is 0\n{self}')
         if value == self._denominator:
             return
         factor = value / self._denominator
         if factor != int(factor):
             raise ValueError(factor)
-        self.numerator = int(factor * self.numerator)
         self._denominator = value
+        self.numerator = int(factor * self.numerator)
+        self._update_sign()
