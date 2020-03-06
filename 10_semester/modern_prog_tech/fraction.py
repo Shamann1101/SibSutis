@@ -3,11 +3,7 @@ from copy import copy
 
 
 class Fraction:
-    def __init__(self, numerator=0, denominator=1):
-        """
-        :param numerator: int
-        :param denominator: int
-        """
+    def __init__(self, numerator: int = 0, denominator: int = 1):
         if type(numerator) == str:
             str_value = str(numerator).strip()
             values = str_value.split('/')
@@ -15,9 +11,13 @@ class Fraction:
                 raise ValueError(numerator)
             numerator = int(values[0])
             denominator = int(values[1]) if len(values) == 2 else 1
-        self._numerator = numerator  # числитель
         if denominator == 0:
-            raise ValueError(denominator)
+            if numerator == 0:
+                numerator = 0
+                denominator = 1
+            else:
+                raise ValueError(denominator)
+        self._numerator = numerator  # числитель
         self._denominator = denominator  # знаменатель
 
         self.reduce_fraction()

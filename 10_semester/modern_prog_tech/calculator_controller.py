@@ -19,10 +19,12 @@ class CalculatorController:
 
     @staticmethod
     def _format_result(result: 'Fraction', need_round: bool) -> str:
-        if result.denominator == 1 and need_round:
-            return str(result.numerator)
-        else:
-            return f'{result.numerator}/{result.denominator}'
+        if need_round:
+            if result.numerator == 0 or result.denominator == 0:
+                return '0'
+            elif result.denominator == 1:
+                return str(result.numerator)
+        return f'{result.numerator}/{result.denominator}'
 
     @staticmethod
     def _get_fractions(first: str, second: str) -> ('Fraction', 'Fraction', str):

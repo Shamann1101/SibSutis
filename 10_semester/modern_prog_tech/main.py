@@ -94,13 +94,15 @@ class CalculatorApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.lineEdit_result.setText('')
 
     def btnSign_action(self):
-        if self.lastLineEdit.text()[0] == '-':
-            self.lastLineEdit.setText(self.lastLineEdit.text()[1:])
-        else:
-            self.lastLineEdit.setText('-' + self.lastLineEdit.text())
+        text = self.lastLineEdit.text()
+        if len(text) > 0:
+            if text[0] == '-':
+                self.lastLineEdit.setText(text[1:])
+            else:
+                self.lastLineEdit.setText('-' + text)
 
     def btnSlash_action(self):
-        if '/' not in self.lastLineEdit.text():
+        if len(self.lastLineEdit.text()) > 0 and '/' not in self.lastLineEdit.text():
             self.lastLineEdit.setText(self.lastLineEdit.text() + '/')
 
     def btnResult_action(self):
