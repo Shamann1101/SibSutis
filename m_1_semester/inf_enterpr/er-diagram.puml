@@ -1,0 +1,50 @@
+@startuml
+
+hide circle
+skinparam linetype ortho
+
+entity "Scores" as s {
+  *s_id : number <<generated>>
+  --
+  *title : text
+  *address : text
+}
+
+entity "Providers" as p {
+  *p_id : number <<generated>>
+  --
+  *title : text
+  *address : text
+  *head : text
+  *phone : text
+  *bank : text
+  *bill : text
+  *inn : text
+}
+
+entity "Goods" as g {
+  *g_id : number <<generated>>
+  --
+  *title : text
+  *unit : text
+  *price : float
+  *p_id : number <<FK>>
+}
+
+entity "Main storage" as ms {
+  *ms_id : number <<generated>>
+  --
+  *amount : float
+  *g_id : number <<FK>>
+}
+
+entity "Score goods" as sg {
+  *sg_id : number <<generated>>
+  --
+  *s_id : number <<FK>>
+  *g_id : number <<FK>>
+  *price : float
+  *amount : float
+}
+
+@enduml
