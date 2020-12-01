@@ -9,6 +9,10 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: example
+      LANG: c.cp1251
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/00-init.sql
+      - ./fixtures.sql:/docker-entrypoint-initdb.d/01-fixtures.sql
     ports:
     - 3306:3306
 
