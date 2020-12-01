@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS goods
     id          INT          NOT NULL AUTO_INCREMENT,
     title       VARCHAR(255) NOT NULL,
     unit        VARCHAR(8)   NOT NULL,
-    price       FLOAT        NOT NULL,
+    price       FLOAT        NOT NULL CHECK ( price > 0 ),
     provider_id INT          NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (provider_id) REFERENCES providers (id) ON UPDATE RESTRICT ON DELETE RESTRICT
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS main_storage
 (
     id       INT   NOT NULL AUTO_INCREMENT,
     goods_id INT   NOT NULL,
-    amount   FLOAT NOT NULL,
+    amount   FLOAT NOT NULL CHECK ( amount > 0 ),
     PRIMARY KEY (id),
     FOREIGN KEY (goods_id) REFERENCES goods (id) ON UPDATE RESTRICT ON DELETE RESTRICT
 );
@@ -58,8 +58,8 @@ CREATE TABLE IF NOT EXISTS score_goods
     id       INT   NOT NULL AUTO_INCREMENT,
     score_id INT   NOT NULL,
     goods_id INT   NOT NULL,
-    price    FLOAT NOT NULL,
-    amount   FLOAT NOT NULL,
+    price    FLOAT NOT NULL CHECK ( price > 0 ),
+    amount   FLOAT NOT NULL CHECK ( amount > 0 ),
     PRIMARY KEY (id),
     FOREIGN KEY (score_id) REFERENCES scores (id) ON UPDATE RESTRICT ON DELETE RESTRICT,
     FOREIGN KEY (goods_id) REFERENCES goods (id) ON UPDATE RESTRICT ON DELETE RESTRICT
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS deliveries
 (
     id            INT NOT NULL AUTO_INCREMENT,
     provider_id   INT NOT NULL,
-    delivery_date DATETIME DEFAULT NOW(),
+    delivery_date DATETIME NOT NULL DEFAULT NOW(),
     PRIMARY KEY (id),
     FOREIGN KEY (provider_id) REFERENCES providers (id) ON UPDATE RESTRICT ON DELETE RESTRICT
 );
@@ -82,8 +82,8 @@ CREATE TABLE IF NOT EXISTS delivery_details
 (
     id          INT   NOT NULL AUTO_INCREMENT,
     goods_id    INT   NOT NULL,
-    price       FLOAT NOT NULL,
-    amount      FLOAT NOT NULL,
+    price       FLOAT NOT NULL CHECK ( price > 0 ),
+    amount      FLOAT NOT NULL CHECK ( amount > 0 ),
     delivery_id INT   NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (goods_id) REFERENCES goods (id) ON UPDATE RESTRICT ON DELETE RESTRICT,
@@ -106,11 +106,13 @@ CREATE TABLE IF NOT EXISTS bids
 
 CREATE TABLE IF NOT EXISTS bid_details
 (
-    id     INT   NOT NULL AUTO_INCREMENT,
-    bid_id INT   NOT NULL,
-    amount FLOAT NOT NULL,
+    id       INT   NOT NULL AUTO_INCREMENT,
+    bid_id   INT   NOT NULL,
+    goods_id INT   NOT NULL,
+    amount   FLOAT NOT NULL CHECK ( amount > 0 ),
     PRIMARY KEY (id),
-    FOREIGN KEY (bid_id) REFERENCES bids (id) ON UPDATE CASCADE ON DELETE CASCADE
+    FOREIGN KEY (bid_id) REFERENCES bids (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (goods_id) REFERENCES goods (id) ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 
 -- По каждому из продавцов требуется обеспечить хранение в БД следующих атрибутов: магазин и отдел; ФИО; пол; возраст и
@@ -123,13 +125,13 @@ CREATE TABLE IF NOT EXISTS sellers
     surname       VARCHAR(64)  NOT NULL,
     name          VARCHAR(64)  NOT NULL,
     patronymic    VARCHAR(64),
-    male          TINYINT      NOT NULL DEFAULT 1,
-    age           SMALLINT     NOT NULL,
+    male          TINYINT      NOT NULL DEFAULT 1 CHECK ( male IN (0, 1) ),
+    birth_date    DATE         NOT NULL,
     address       VARCHAR(255) NOT NULL,
-    seniority     SMALLINT     NOT NULL DEFAULT 0,
+    seniority     SMALLINT     NOT NULL DEFAULT 0 CHECK ( seniority >= 0 ),
     qualification VARCHAR(255),
     PRIMARY KEY (id),
-    FOREIGN KEY (score_id) REFERENCES scores (id) ON UPDATE CASCADE ON DELETE CASCADE
+    FOREIGN KEY (score_id) REFERENCES scores (id) ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 
 -- Для учета сведений о выручке в БД постоянно фиксируется: дата; продавец; перечень продан-ных товаров (с указанием
@@ -149,7 +151,7 @@ CREATE TABLE IF NOT EXISTS sale_details
     id       INT   NOT NULL AUTO_INCREMENT,
     sale_id  INT   NOT NULL,
     goods_id INT   NOT NULL,
-    amount   FLOAT NOT NULL,
+    amount   FLOAT NOT NULL CHECK ( amount > 0 ),
     PRIMARY KEY (id),
     FOREIGN KEY (sale_id) REFERENCES sales (id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (goods_id) REFERENCES goods (id) ON UPDATE CASCADE ON DELETE CASCADE
@@ -169,3 +171,17 @@ FROM scores s
          JOIN score_goods sg on s.id = sg.score_id
          JOIN goods g on sg.goods_id = g.id
 ORDER BY s.id, sg.id;
+
+CREATE VIEW seller_view AS
+SELECT CONCAT_WS(' ', s.surname, s.name, s.patronymic)     seller,
+       DATE(sa.sale_date)                                  `date`,
+       SUM(sd.amount * g.price)                            goods_cost,
+       SUM(sd.amount * sg.price)                           sales,
+       SUM((sd.amount * sg.price) - (sd.amount * g.price)) proceeds
+FROM sellers s
+         JOIN sales sa ON s.id = sa.seller_id
+         JOIN sale_details sd ON sa.id = sd.sale_id
+         JOIN goods g ON g.id = sd.goods_id
+         JOIN score_goods sg ON sg.id = sd.goods_id
+GROUP BY s.id, `date`
+ORDER BY `date`, seller;
