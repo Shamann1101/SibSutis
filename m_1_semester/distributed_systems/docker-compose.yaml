@@ -1,0 +1,31 @@
+# Use root/example as user/password credentials
+version: '3.1'
+
+services:
+  host_1:
+    image: debian
+    command: tail -f /var/log/faillog
+    networks:
+      app_net:
+        ipv4_address: 192.168.0.2
+        ipv6_address: 2001:3200:3200::20
+
+  host_2:
+    image: debian
+    command: tail -f /var/log/faillog
+    networks:
+      app_net:
+        ipv4_address: 192.168.0.3
+        ipv6_address: 2001:3200:3200::21
+
+networks:
+  app_net:
+    enable_ipv6: true
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.0.0/24
+          gateway: 192.168.0.1
+        - subnet: 2001:3200:3200::/64
+          gateway: 2001:3200:3200::1
