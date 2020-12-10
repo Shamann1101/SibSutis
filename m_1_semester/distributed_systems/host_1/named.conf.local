@@ -1,0 +1,61 @@
+zone "zone1.local" IN { //Domain name
+
+     type master; //Primary DNS
+
+     file "/etc/bind/forward.zone1.local.db"; //Forward lookup file
+
+     allow-update { none; }; // Since this is the primary DNS, it should be none.
+
+};
+
+zone "zone2.local" IN {
+
+    type slave;
+
+    file "/etc/bind/forward.zone2.local.db";
+
+    masters { 192.168.0.20; };
+
+    allow-notify { 192.168.0.20; };
+
+};
+
+//zone "zone3.local" IN {
+
+//     type master;
+
+//     file "/etc/bind/forward.zone3.local.db";
+
+//     allow-update { none; };
+
+//};
+
+//zone "магистратура.сибгути.local" IN {
+
+//     type slave;
+
+//     file "/etc/bind/forward.zone2.local.db";
+
+//     masters { 172.19.0.3; };
+
+//};
+
+zone "0.168.192.in-addr.arpa" IN { //Reverse lookup name, should match your network in reverse order
+
+     type master; // Primary DNS
+
+     file "/etc/bind/reverse.zone1.local.db"; //Reverse lookup file
+
+     allow-update { none; }; //Since this is the primary DNS, it should be none.
+
+};
+
+//zone "0.0.0.0.0.0.2.3.0.0.2.3.1.0.0.2.ip6.arpa" IN {
+
+//     type slave;
+
+//     file "/etc/bind/reverse.zonev6.local.db";
+
+//     masters { 2001:3200:3200::21; };
+
+//};

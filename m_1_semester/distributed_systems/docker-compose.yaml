@@ -5,21 +5,62 @@ services:
   host_1:
     image: debian
     command: tail -f /var/log/faillog
+    build: './host_1'
+    volumes:
+      - ./host_1/resolv.conf:/etc/resolv.conf
+      - ./host_1/named.conf.local:/etc/bind/named.conf.local
+      - ./host_1/named.conf.options:/etc/bind/named.conf.options
+      - ./host_1/forward.zone1.local.db:/etc/bind/forward.zone1.local.db
+      - ./host_1/reverse.zone1.local.db:/etc/bind/reverse.zone1.local.db
+    dns:
+      - 192.168.0.20
+      - 2001:3200:3100::20
     networks:
-      app_net:
-        ipv4_address: 192.168.0.2
-        ipv6_address: 2001:3200:3200::20
+      local:
+        ipv4_address: 192.168.0.10
+        ipv6_address: 2001:3200:3100::10
 
   host_2:
     image: debian
     command: tail -f /var/log/faillog
+    build: './host_2'
+    volumes:
+      - ./host_2/resolv.conf:/etc/resolv.conf
+      - ./host_2/named.conf.local:/etc/bind/named.conf.local
+      - ./host_2/named.conf.options:/etc/bind/named.conf.options
+      - ./host_2/forward.zone2.local.db:/etc/bind/forward.zone2.local.db
+    dns:
+      - 192.168.0.10
+      - 2001:3200:3100::10
     networks:
-      app_net:
-        ipv4_address: 192.168.0.3
-        ipv6_address: 2001:3200:3200::21
+      local:
+        ipv4_address: 192.168.0.20
+        ipv6_address: 2001:3200:3100::20
+
+  host_3:
+    image: debian
+    command: tail -f /var/log/faillog
+    networks:
+      local:
+        ipv4_address: 192.168.0.30
+        ipv6_address: 2001:3200:3100::30
+      inner:
+        ipv4_address: 192.168.1.10
+        ipv6_address: 2001:3200:3200::10
+
+  host_4:
+    image: debian
+    command: tail -f /var/log/faillog
+    networks:
+      local:
+        ipv4_address: 192.168.0.40
+        ipv6_address: 2001:3200:3100::40
+      inner:
+        ipv4_address: 192.168.1.20
+        ipv6_address: 2001:3200:3200::20
 
 networks:
-  app_net:
+  local:
     enable_ipv6: true
     driver: bridge
     ipam:
@@ -27,5 +68,15 @@ networks:
       config:
         - subnet: 192.168.0.0/24
           gateway: 192.168.0.1
+        - subnet: 2001:3200:3100::/64
+          gateway: 2001:3200:3100::1
+  inner:
+    enable_ipv6: true
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.1.0/24
+          gateway: 192.168.1.1
         - subnet: 2001:3200:3200::/64
           gateway: 2001:3200:3200::1
