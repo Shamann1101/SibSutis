@@ -1,0 +1,16 @@
+;
+; BIND reverse data file for local loopback interface
+;
+$TTL	604800
+@	IN	SOA	xn--80aaakzv5abgkcm.xn--90aenc5bjg.local. root.xn--80aaakzv5abgkcm.xn--90aenc5bjg.local. (
+			      1		; Serial
+			 604800		; Refresh
+			  86400		; Retry
+			2419200		; Expire
+			 604800 )	; Negative Cache TTL
+;
+@	IN	NS	ns1.xn--80aaakzv5abgkcm.xn--90aenc5bjg.local.
+$ORIGIN 0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.1.3.0.0.2.3.1.0.0.2.ip6.arpa.
+0.2	IN	PTR	ns1.xn--80aaakzv5abgkcm.xn--90aenc5bjg.local.
+0.1	IN	PTR	host-1.xn--80aaakzv5abgkcm.xn--90aenc5bjg.local.
+

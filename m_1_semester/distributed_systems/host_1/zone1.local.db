@@ -11,4 +11,5 @@ $TTL	604800
 ;
 @	IN	NS	ns1.zone1.local.
 ns1     IN      A       192.168.0.10
-host_1	IN	CNAME	ns1.zone1.local.
+host-1	IN      CNAME	ns1
+host-2  IN      A       192.168.0.20

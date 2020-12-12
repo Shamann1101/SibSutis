@@ -10,8 +10,9 @@ services:
       - ./host_1/resolv.conf:/etc/resolv.conf
       - ./host_1/named.conf.local:/etc/bind/named.conf.local
       - ./host_1/named.conf.options:/etc/bind/named.conf.options
-      - ./host_1/forward.zone1.local.db:/etc/bind/forward.zone1.local.db
-      - ./host_1/reverse.zone1.local.db:/etc/bind/reverse.zone1.local.db
+      - ./host_1/zone1.local.db:/etc/bind/zone1.local.db
+      - ./host_1/zone3.local.db:/etc/bind/zone3.local.db
+      - ./host_1/0.168.192.in-addr.arpa.db:/etc/bind/0.168.192.in-addr.arpa.db
     dns:
       - 192.168.0.20
       - 2001:3200:3100::20
@@ -28,7 +29,10 @@ services:
       - ./host_2/resolv.conf:/etc/resolv.conf
       - ./host_2/named.conf.local:/etc/bind/named.conf.local
       - ./host_2/named.conf.options:/etc/bind/named.conf.options
-      - ./host_2/forward.zone2.local.db:/etc/bind/forward.zone2.local.db
+      - ./host_2/zone2.local.db:/etc/bind/zone2.local.db
+      - ./host_2/zone3.local.db:/etc/bind/zone3.local.db
+      - ./host_2/xn--80aaakzv5abgkcm.xn--90aenc5bjg.local.db:/etc/bind/xn--80aaakzv5abgkcm.xn--90aenc5bjg.local.db
+      - ./host_2/0.0.0.0.0.0.1.3.0.0.2.3.1.0.0.2.ip6.arpa.db:/etc/bind/0.0.0.0.0.0.1.3.0.0.2.3.1.0.0.2.ip6.arpa.db
     dns:
       - 192.168.0.10
       - 2001:3200:3100::10
