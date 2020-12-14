@@ -44,7 +44,7 @@ entity "Score goods" as sg {
 entity "Deliveries" as d {
   **d_id** : number <<generated>>
   --
-  *dd_id : number <<FK>>
+  *p_id : number <<FK>>
   *delivery_date : datetime
 }
 
@@ -103,21 +103,21 @@ entity "Sale details" as sd {
 }
 
 s ||--|{ se
-s }|--|{ sg
+s ||--|{ sg
 s ||--|{ b
 
-b ||--|| bd
-bd }|--|{ g
+b ||--|{ bd
+bd ||--|{ g
 
-p }|--|{ d
-d ||--|| dd
-dd }|--|{ g
+p }|--|| d
+d ||--|{ dd
+dd ||--|{ g
 
 p }|--|| g
-g }|--|{ sg
+g }|--|| sg
 
-sa ||--|| sd
-sd }|--|{ g
+sa ||--|{ sd
+sd ||--|{ g
 se ||--|{ sa
 
 @enduml
