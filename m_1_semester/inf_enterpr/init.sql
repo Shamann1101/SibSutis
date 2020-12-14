@@ -38,29 +38,19 @@ CREATE TABLE IF NOT EXISTS goods
     unit        VARCHAR(8)   NOT NULL,
     price       FLOAT        NOT NULL CHECK ( price > 0 ),
     provider_id INT          NOT NULL,
+    amount      FLOAT        NOT NULL CHECK ( amount > 0 ),
     PRIMARY KEY (id),
     FOREIGN KEY (provider_id) REFERENCES providers (id) ON UPDATE RESTRICT ON DELETE RESTRICT
-);
-
--- Основной склад
-CREATE TABLE IF NOT EXISTS main_storage
-(
-    id       INT   NOT NULL AUTO_INCREMENT,
-    goods_id INT   NOT NULL,
-    amount   FLOAT NOT NULL CHECK ( amount > 0 ),
-    PRIMARY KEY (id),
-    FOREIGN KEY (goods_id) REFERENCES goods (id) ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 
 -- Склады магазинов
 CREATE TABLE IF NOT EXISTS score_goods
 (
-    id       INT   NOT NULL AUTO_INCREMENT,
     score_id INT   NOT NULL,
     goods_id INT   NOT NULL,
     price    FLOAT NOT NULL CHECK ( price > 0 ),
     amount   FLOAT NOT NULL CHECK ( amount > 0 ),
-    PRIMARY KEY (id),
+    PRIMARY KEY (score_id, goods_id),
     FOREIGN KEY (score_id) REFERENCES scores (id) ON UPDATE RESTRICT ON DELETE RESTRICT,
     FOREIGN KEY (goods_id) REFERENCES goods (id) ON UPDATE RESTRICT ON DELETE RESTRICT
 );
@@ -71,8 +61,8 @@ CREATE TABLE IF NOT EXISTS score_goods
 -- Доставки
 CREATE TABLE IF NOT EXISTS deliveries
 (
-    id            INT NOT NULL AUTO_INCREMENT,
-    provider_id   INT NOT NULL,
+    id            INT      NOT NULL AUTO_INCREMENT,
+    provider_id   INT      NOT NULL,
     delivery_date DATETIME NOT NULL DEFAULT NOW(),
     PRIMARY KEY (id),
     FOREIGN KEY (provider_id) REFERENCES providers (id) ON UPDATE RESTRICT ON DELETE RESTRICT
@@ -80,12 +70,11 @@ CREATE TABLE IF NOT EXISTS deliveries
 
 CREATE TABLE IF NOT EXISTS delivery_details
 (
-    id          INT   NOT NULL AUTO_INCREMENT,
     goods_id    INT   NOT NULL,
     price       FLOAT NOT NULL CHECK ( price > 0 ),
     amount      FLOAT NOT NULL CHECK ( amount > 0 ),
     delivery_id INT   NOT NULL,
-    PRIMARY KEY (id),
+    PRIMARY KEY (goods_id, delivery_id),
     FOREIGN KEY (goods_id) REFERENCES goods (id) ON UPDATE RESTRICT ON DELETE RESTRICT,
     FOREIGN KEY (delivery_id) REFERENCES deliveries (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -106,11 +95,10 @@ CREATE TABLE IF NOT EXISTS bids
 
 CREATE TABLE IF NOT EXISTS bid_details
 (
-    id       INT   NOT NULL AUTO_INCREMENT,
     bid_id   INT   NOT NULL,
     goods_id INT   NOT NULL,
     amount   FLOAT NOT NULL CHECK ( amount > 0 ),
-    PRIMARY KEY (id),
+    PRIMARY KEY (bid_id, goods_id),
     FOREIGN KEY (bid_id) REFERENCES bids (id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (goods_id) REFERENCES goods (id) ON UPDATE RESTRICT ON DELETE RESTRICT
 );
@@ -148,21 +136,13 @@ CREATE TABLE IF NOT EXISTS sales
 
 CREATE TABLE IF NOT EXISTS sale_details
 (
-    id       INT   NOT NULL AUTO_INCREMENT,
     sale_id  INT   NOT NULL,
     goods_id INT   NOT NULL,
     amount   FLOAT NOT NULL CHECK ( amount > 0 ),
-    PRIMARY KEY (id),
+    PRIMARY KEY (sale_id, goods_id),
     FOREIGN KEY (sale_id) REFERENCES sales (id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (goods_id) REFERENCES goods (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
-
--- Товары магазинов
-CREATE VIEW main_storage_view AS
-SELECT g.title, ms.amount, g.unit, g.price
-FROM main_storage ms
-         JOIN goods g on ms.goods_id = g.id
-ORDER BY ms.id;
 
 -- Товары магазинов
 CREATE VIEW score_view AS
@@ -170,7 +150,7 @@ SELECT s.title score, g.title goods, sg.amount, g.unit, sg.price
 FROM scores s
          JOIN score_goods sg on s.id = sg.score_id
          JOIN goods g on sg.goods_id = g.id
-ORDER BY s.id, sg.id;
+ORDER BY s.id;
 
 CREATE VIEW seller_view AS
 SELECT CONCAT_WS(' ', s.surname, s.name, s.patronymic)     seller,
@@ -182,6 +162,6 @@ FROM sellers s
          JOIN sales sa ON s.id = sa.seller_id
          JOIN sale_details sd ON sa.id = sd.sale_id
          JOIN goods g ON g.id = sd.goods_id
-         JOIN score_goods sg ON sg.id = sd.goods_id
+         JOIN score_goods sg ON sg.score_id = s.score_id AND sg.goods_id = sd.goods_id
 GROUP BY s.id, `date`
 ORDER BY `date`, seller;
