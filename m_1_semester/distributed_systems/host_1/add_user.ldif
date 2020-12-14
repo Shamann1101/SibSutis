@@ -1,0 +1,14 @@
+dn: uid=jsmith,ou=users,dc=zone1,dc=local
+changetype: add
+uid: jsmith
+uidNumber: 20000
+gidNumber: 20000
+cn: John
+sn: Smith
+objectClass: top
+objectClass: person
+objectClass: posixAccount
+objectClass: shadowAccount
+loginShell: /bin/bash
+homeDirectory: /home/jsmith
+userPassword: {SSHA}j+H9rlIbLf9Huh6TKPsSMQ6HiqSilFz5

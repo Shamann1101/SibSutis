@@ -1,0 +1,6 @@
+dn: ou=users,dc=zone1,dc=local
+changetype: add
+objectClass: top
+objectClass: organizationalUnit
+ou: users
+description: Domain Users
