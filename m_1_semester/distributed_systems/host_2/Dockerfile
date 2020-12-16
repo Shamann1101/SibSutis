@@ -13,4 +13,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -yq \
     libnss-ldap \
     libpam-ldap \
     nscd \
+    ntp \
+    ntpdate \
     vim

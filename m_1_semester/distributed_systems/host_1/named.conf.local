@@ -30,6 +30,16 @@ zone "zone3.local" IN {
 
 };
 
+zone "ntp.local" IN {
+
+     type master;
+
+     file "/etc/bind/ntp.local.db";
+
+     allow-update { none; };
+
+};
+
 zone "xn--80aaakzv5abgkcm.xn--90aenc5bjg.local" IN {
 
     type slave;

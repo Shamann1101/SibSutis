@@ -12,11 +12,13 @@ services:
       - ./host_1/named.conf.options:/etc/bind/named.conf.options
       - ./host_1/zone1.local.db:/etc/bind/zone1.local.db
       - ./host_1/zone3.local.db:/etc/bind/zone3.local.db
+      - ./host_1/ntp.local.db:/etc/bind/ntp.local.db
       - ./host_1/0.168.192.in-addr.arpa.db:/etc/bind/0.168.192.in-addr.arpa.db
       - ./host_1/libnss-ldap.conf:/etc/libnss-ldap.conf
       - ./host_1/nsswitch.conf:/etc/nsswitch.conf
       - ./host_1/add_group.ldif:/tmp/add_group.ldif
       - ./host_1/add_user.ldif:/tmp/add_user.ldif
+      - ./host_1/ntp.conf:/etc/ntp.conf
     dns:
       - 192.168.0.20
       - 2001:3200:3100::20
@@ -40,6 +42,7 @@ services:
       - ./host_2/libnss-ldap.conf:/etc/libnss-ldap.conf
       - ./host_2/nsswitch.conf:/etc/nsswitch.conf
       - ./host_2/pam_ldap.conf:/etc/pam_ldap.conf
+      - ./host_2/ntp.conf:/etc/ntp.conf
     dns:
       - 192.168.0.10
       - 2001:3200:3100::10
@@ -51,6 +54,13 @@ services:
   host_3:
     image: debian
     command: tail -f /var/log/faillog
+    volumes:
+      - ./host_3/ntp.conf:/etc/ntp.conf
+    dns:
+      - 192.168.0.10
+      - 192.168.0.20
+      - 2001:3200:3100::10
+      - 2001:3200:3100::20
     networks:
       local:
         ipv4_address: 192.168.0.30
@@ -62,6 +72,13 @@ services:
   host_4:
     image: debian
     command: tail -f /var/log/faillog
+    volumes:
+      - ./host_3/ntp.conf:/etc/ntp.conf
+    dns:
+      - 192.168.0.10
+      - 192.168.0.20
+      - 2001:3200:3100::10
+      - 2001:3200:3100::20
     networks:
       local:
         ipv4_address: 192.168.0.40

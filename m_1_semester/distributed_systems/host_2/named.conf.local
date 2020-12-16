@@ -30,6 +30,18 @@ zone "zone3.local" IN {
 
 };
 
+zone "ntp.local" IN {
+
+    type slave;
+
+    file "/etc/bind/ntp.local.db";
+
+    masters { 192.168.0.10; };
+
+    allow-notify { 192.168.0.10; };
+
+};
+
 zone "xn--80aaakzv5abgkcm.xn--90aenc5bjg.local" IN {
 
      type master;
