@@ -1,0 +1,123 @@
+@startuml
+
+hide circle
+skinparam linetype ortho
+
+entity "Scores" as s {
+  **s_id** : number <<generated>>
+  --
+  *title : text
+  *address : text
+}
+
+entity "Providers" as p {
+  **p_id** : number <<generated>>
+  --
+  *title : text
+  *address : text
+  *head : text
+  *phone : text
+  *bank : text
+  *bill : text
+  *inn : text
+}
+
+entity "Goods" as g {
+  **g_id** : number <<generated>>
+  --
+  *title : text
+  *unit : text
+  *price : float
+  *p_id : number <<FK>>
+  *amount : float
+}
+
+entity "Score goods" as sg {
+  **s_id, g_id** : <<PK>>
+  --
+  *s_id : number <<FK>>
+  *g_id : number <<FK>>
+  *price : float
+  *amount : float
+}
+
+entity "Deliveries" as d {
+  **d_id** : number <<generated>>
+  --
+  *p_id : number <<FK>>
+  *delivery_date : datetime
+}
+
+entity "Delivery details" as dd {
+  **d_id, g_id** : <<PK>>
+  --
+  *g_id : number <<FK>>
+  *price : float
+  *amount : float
+  *d_id : number <<FK>>
+}
+
+entity "Bids" as b {
+  **b_id** : number <<generated>>
+  --
+  *s_id : number <<FK>>
+  *bid_date : datetime
+  *status : number
+}
+
+entity "Bid details" as bd {
+  **b_id, g_id** : <<PK>>
+  --
+  *b_id : number <<FK>>
+  *g_id : number <<FK>>
+  *amount : float
+}
+
+entity "Sellers" as se {
+  **se_id** : number <<generated>>
+  --
+  *s_id : number <<FK>>
+  *surname : text
+  *name : text
+  *patronymic : text
+  *male : bool
+  *birth_date : date
+  *address : text
+  *seniority : number
+  *qualification : text
+}
+
+entity "Sales" as sa {
+  **sa_id** : number <<generated>>
+  --
+  *se_id : number <<FK>>
+  *sale_date : datetime
+}
+
+entity "Sale details" as sd {
+  **sa_id, g_id** : <<PK>>
+  --
+  *sa_id : number <<FK>>
+  *g_id : number <<FK>>
+  *amount : float
+}
+
+s ||--|{ se
+s ||--|{ sg
+s ||--|{ b
+
+b ||--|{ bd
+bd ||--|{ g
+
+p }|--|| d
+d ||--|{ dd
+dd ||--|{ g
+
+p }|--|| g
+g }|--|| sg
+
+sa ||--|{ sd
+sd ||--|{ g
+se ||--|{ sa
+
+@enduml

@@ -1,0 +1,75 @@
+zone "zone1.local" IN {
+
+    type slave;
+
+    file "/etc/bind/zone1.local.db";
+
+    masters { 192.168.0.10; };
+
+    allow-notify { 192.168.0.10; };
+
+};
+
+zone "zone2.local" IN {
+
+     type master;
+
+     file "/etc/bind/zone2.local.db";
+
+     allow-update { none; };
+
+};
+
+zone "zone3.local" IN {
+
+     type master;
+
+     file "/etc/bind/zone3.local.db";
+
+     allow-update { none; };
+
+};
+
+zone "ntp.local" IN {
+
+    type slave;
+
+    file "/etc/bind/ntp.local.db";
+
+    masters { 192.168.0.10; };
+
+    allow-notify { 192.168.0.10; };
+
+};
+
+zone "xn--80aaakzv5abgkcm.xn--90aenc5bjg.local" IN {
+
+     type master;
+
+     file "/etc/bind/xn--80aaakzv5abgkcm.xn--90aenc5bjg.local.db";
+
+     allow-update { none; };
+
+};
+
+zone "0.168.192.in-addr.arpa" IN { //Reverse lookup name, should match your network in reverse order
+
+    type slave;
+
+    file "/etc/bind/0.168.192.in-addr.arpa.db";
+
+    masters { 192.168.0.10; };
+
+    allow-notify { 192.168.0.10; };
+
+};
+
+zone "0.0.0.0.0.0.1.3.0.0.2.3.1.0.0.2.ip6.arpa" IN {
+
+     type master;
+
+     file "/etc/bind/0.0.0.0.0.0.1.3.0.0.2.3.1.0.0.2.ip6.arpa.db";
+
+     allow-update { none; };
+
+};

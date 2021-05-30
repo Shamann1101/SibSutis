@@ -1,0 +1,19 @@
+;
+; BIND reverse data file for local loopback interface
+;
+$TTL	604800
+@	IN	SOA	zone1.local. root.zone1.local. (
+			      1		; Serial
+			 604800		; Refresh
+			  86400		; Retry
+			2419200		; Expire
+			 604800 )	; Negative Cache TTL
+;
+@	IN	NS	ns1.zone1.local.
+10	IN	PTR	ns1.zone1.local.
+20	IN	PTR	host-2.zone1.local.
+
+20	IN	PTR	ns1.zone2.local.
+10	IN	PTR	host-1.zone2.local.
+
+10	IN	PTR	ns1.zone3.local.
