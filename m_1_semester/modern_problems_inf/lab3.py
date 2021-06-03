@@ -1,5 +1,6 @@
-from lab2 import MTF
+import helpers
 from lab1 import elias_gamma
+from lab2 import MTF
 
 
 class BurrowsWheeler:
@@ -9,10 +10,10 @@ class BurrowsWheeler:
         self._index = -1
 
     @property
-    def index(self):
+    def index(self) -> int:
         return self._index
 
-    def transform(self, s):
+    def transform(self, s: list) -> list:
         # assert self.EOS not in s, "Input string cannot contain null character (%s)" % self.EOS
 
         rotations = [s[i:] + s[:i] for i in range(len(s))]
@@ -21,17 +22,17 @@ class BurrowsWheeler:
 
         last_column = [row[-1] for row in table]
 
-        r = ''.join(last_column)
+        # r = ''.join(last_column)
 
         self._index = table.index(s)
 
-        return r
+        return last_column
 
-    def inverse(self, s):
+    def inverse(self, s: list) -> str:
         table = [''] * len(s)
 
         for i in range(len(s)):
-            prepended = [s[i] + table[i] for i in range(len(s))]
+            prepended = [s[i].decode("utf-8") + table[i] for i in range(len(s))]
 
             table = sorted(prepended)
 
@@ -40,57 +41,36 @@ class BurrowsWheeler:
         return s
 
 
-def encode_bwt(sequence):
-    sequence += '\0'
-    table = [sequence[index:] + sequence[:index] for index, _ in enumerate(sequence)]
-    table.sort()
-    bwt = [rotation[-1] for rotation in table]
-    bwt = ''.join(bwt)
-
-    return bwt
-
-
-def decode_bwt(sequence):
-    table = [col for col in sequence]
-    for i in range(len(sequence) - 1):
-        table.sort()
-        table = [sequence[i] + table[i] for i in range(len(sequence))]
-
-    return table[[row[-1] for row in table].index('\0')].replace('\0', '')
-
-
 def _main():
-    # message = input('Enter sequence: ')
-    # message = open('../../10_semester/information_theory/file_3.txt', mode='r').read()
-    message = open('lab3.py', mode='r').read()
+    generated_file = __file__.split('.')[0] + '_generated.txt'
+    helpers.generate_file(generated_file)
+    for file_name in [__file__, generated_file, 'text.txt']:
+        byte_list = helpers.get_byte_list_from_file(file_name)
 
-    bwt = BurrowsWheeler()
+        bwt = BurrowsWheeler()
 
-    mtf = MTF()
-    mtf.set_alphabet_from_message(message)
+        mtf = MTF(byte_list)
 
-    cipher = mtf.encode(message)
-    # print(f'cipher: {cipher}')
-    elias_cipher = ''
-    for char in cipher:
-        elias_cipher += elias_gamma(int(char))
-    with open('raw.txt', mode='w') as f:
-        f.write(elias_cipher)
-    # print(f'elias_cipher: {elias_cipher}')
+        cipher = mtf.encode(byte_list)
+        elias_cipher = ''
+        for char in cipher:
+            elias_cipher += elias_gamma(int(char))
 
-    transform = bwt.transform(message)
-    # print('Burrows-Wheeler Transform: ' + str(transform))
-    cipher = mtf.encode(transform)
-    # print(f'cipher: {cipher}')
-    elias_cipher = ''
-    for char in cipher:
-        elias_cipher += elias_gamma(int(char))
-    with open('bwt.txt', mode='w') as f:
-        f.write(elias_cipher)
-    # print(f'elias_cipher: {elias_cipher}')
+        helpers.write_bin_string_to_file(file_name.split('.')[0] + '_raw.txt', elias_cipher)
+        # print(f'elias_cipher: {elias_cipher}')
 
-    # inverse = bwt.inverse(transform)
-    # print('Inverse Burrows-Wheeler Transform: ' + str(inverse))
+        transform = bwt.transform(byte_list)
+        # print('Burrows-Wheeler Transform: ' + str(transform))
+        cipher = mtf.encode(transform)
+        # print(f'cipher: {cipher}')
+        elias_cipher = ''
+        for char in cipher:
+            elias_cipher += elias_gamma(int(char))
+
+        helpers.write_bin_string_to_file(file_name.split('.')[0] + '_bwt.txt', elias_cipher)
+
+        # with open(file_name.split('.')[0] + '_decoded.txt', 'w') as f:
+        #     f.write(bwt.inverse(mtf.decode(cipher)))
 
 
 if __name__ == '__main__':
