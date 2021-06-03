@@ -4,8 +4,6 @@ from lab2 import MTF
 
 
 class BurrowsWheeler:
-    EOS = "\0"
-
     def __init__(self):
         self._index = -1
 
@@ -14,15 +12,11 @@ class BurrowsWheeler:
         return self._index
 
     def transform(self, s: list) -> list:
-        # assert self.EOS not in s, "Input string cannot contain null character (%s)" % self.EOS
-
         rotations = [s[i:] + s[:i] for i in range(len(s))]
 
         table = sorted(rotations)
 
         last_column = [row[-1] for row in table]
-
-        # r = ''.join(last_column)
 
         self._index = table.index(s)
 
@@ -37,6 +31,7 @@ class BurrowsWheeler:
             table = sorted(prepended)
 
         s = table[self._index]
+        self._index = -1
 
         return s
 

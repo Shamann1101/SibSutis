@@ -19,9 +19,6 @@ class MTF:
             raise ValueError('Alphabet is empty')
         self._alphabet = list(set(value))
 
-    def set_alphabet_from_message(self, message: str):
-        self._alphabet = list(set(list(message)))
-
     def encode(self, message: list, alphabet: list = None) -> list:
         if alphabet is None:
             alphabet = copy(self._alphabet)
@@ -49,12 +46,10 @@ def _main():
 
     mtf = MTF(byte_list)
     cipher = mtf.encode(byte_list)
-    # print(f'cipher: {cipher}')
 
     elias_cipher = ''
     for char in cipher:
         elias_cipher += elias_gamma(int(char))
-    # print(f'elias_cipher: {elias_cipher}')
 
     helpers.write_bin_string_to_file(input_file_name.split('.')[0] + '_out.txt', elias_cipher)
 
