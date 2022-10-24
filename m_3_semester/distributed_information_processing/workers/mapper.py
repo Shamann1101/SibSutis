@@ -25,7 +25,7 @@ def _iterate_line_contents(_word: str, _doc_name: str):
         }
     else:
         # if not key_dict[word].get(_doc_name):
-        if not key_dict[word][_doc_name]:
+        if not key_dict[word].get(_doc_name):
             # _debug_str(str(key_dict) + '\n')
             key_dict[word][_doc_name] = 1
         else:
@@ -36,18 +36,30 @@ def _iterate_line_contents(_word: str, _doc_name: str):
 
 def _get_top_words(limit: int = TOP_WORDS_LIMIT) -> list:
     return list(
-        dict(sorted((sum([v for v in value.values()]), key) for (key, value) in key_dict.items())[-limit:]).values())
+        dict(sorted((sum([count for count in value.values()]), word) for (word, value) in key_dict.items())[
+             -limit:]).values())
 
 
 def _stdout_result():
-    # for _key in key_list:
-    #     print('%s\t%s' % (_key, 1))
-
     for word, item in key_dict.items():
         if word in _get_top_words():
             continue
         for doc_id, count in item.items():
-            print('%s\t%s' % (str(word) + ',' + str(doc_id), str(count)))
+            print('%s\t%s' % (
+                str(word) + ',' + str(doc_id),
+                str(count) + ',' + str(len(list(doc_dict[doc_id])))
+            ))
+
+
+def _set_doc_dict():
+    for word, d in key_dict.items():
+        for doc_id, count in d.items():
+            if not doc_dict.get(doc_id):
+                doc_dict[doc_id] = {word: count}
+            else:
+                doc_dict[doc_id][word] = count
+    # _debug_str(str(doc_dict) + '\n', './output/debug.json')  # FIXME
+    # _debug_str(str(key_dict) + '\n')  # FIXME
 
 
 def _debug_str(string: str, out: str = './output/debug.txt'):
@@ -59,7 +71,8 @@ revision = False
 text = False
 page_id = None
 key_list = []
-key_dict = {}
+key_dict = {}  # {word: {doc_id: count}}
+doc_dict = {}  # {doc_id: {word: count}}
 for line in sys.stdin:
     if 'revision' in re.findall(re_open_tag, line):
         revision = True
@@ -104,4 +117,5 @@ for line in sys.stdin:
     for content in line_contents:
         _iterate_line_contents(content, page_id)
 
+_set_doc_dict()
 _stdout_result()
