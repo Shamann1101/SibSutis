@@ -10,24 +10,18 @@ def _stdout_result():
             print('%s\t%.12f' % (str(_word) + ',' + str(_doc_id), tf_idf))
 
 
-def _set_doc_dict():
-    for _word, d in key_dict.items():
-        for _doc_id, _count in d.items():
-            if not doc_dict.get(_doc_id):
-                doc_dict[_doc_id] = {_word: _count}
-            else:
-                doc_dict[_doc_id][_word] = _count
-
-
 def _set_tf_dict():
+    doc_count = len(set([item for sublist in [list(v.keys()) for v in key_dict.values()] for item in sublist]))
     for _word, d in key_dict.items():
         for _doc_id, _count in d.items():
-            tf = int(_count) / len(list(doc_dict[_doc_id]))
-            idf = log(len(doc_dict.keys()) / len(key_dict[_word].keys()))
+            c = sum([v[_doc_id] if v.get(_doc_id) else 0 for (w, v) in key_dict.items()])
+            tf = int(_count) / c
+            idf = log(doc_count / len(key_dict[_word].keys()))
             tf_idf = tf * idf
-            # result = f'{_count}/{len(list(doc_dict[_doc_id]))}={tf},'
-            # result += f'log({len(doc_dict.keys())}/{len(key_dict[_word].keys())})={idf},'
+            # result = f'{_count}/{c}={tf},'
+            # result += f'log({doc_count}/{len(key_dict[_word].keys())})={idf},'
             # result += f'{tf}*{idf}={tf_idf}'
+            # _debug_str(result + '\n')  # FIXME
             if not tf_dict.get(_word):
                 tf_dict[_word] = {_doc_id: tf_idf}
             else:
@@ -40,13 +34,12 @@ def _debug_str(string: str, out: str = './output/debug.txt'):
 
 
 key_dict = {}  # {word: {doc_id: count}}
-doc_dict = {}  # {doc_id: {word: count}}
 tf_dict = {}
 
 for line in sys.stdin:
-    (key, value) = line.rstrip().split('\t', 1)
-    (word, doc_id) = key.split(',', 1)
-    (count, word_count) = value.split(',', 1)
+    (word, value) = line.rstrip().split('\t', 1)
+    (doc_id, count) = value.split(',', 1)
+    count = int(count)
 
     if not key_dict.get(word):
         key_dict[word] = {
@@ -57,6 +50,5 @@ for line in sys.stdin:
             key_dict[word][doc_id] = count
         else:
             key_dict[word][doc_id] += count
-_set_doc_dict()
 _set_tf_dict()
 _stdout_result()

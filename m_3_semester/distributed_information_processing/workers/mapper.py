@@ -17,49 +17,21 @@ def _iterate_line_contents(_word: str, _doc_name: str):
     word = _str_cleanup(_word)
     if word == '':
         return
-    key_list.append(word + ',' + _doc_name)
-
-    if not key_dict.get(word):
-        key_dict[word] = {
-            _doc_name: 1
-        }
-    else:
-        # if not key_dict[word].get(_doc_name):
-        if not key_dict[word].get(_doc_name):
-            # _debug_str(str(key_dict) + '\n')
-            key_dict[word][_doc_name] = 1
-        else:
-            # _debug_str(f'before[{word}]: ' + str(key_dict[word]) + '\n')
-            key_dict[word][_doc_name] += 1
-            # _debug_str(f'after[{word}]: ' + str(key_dict[word]) + '\n')
+    print('%s\t%s' % (
+        word,
+        str(_doc_name) + ',1'
+    ))
 
 
 def _get_top_words(limit: int = TOP_WORDS_LIMIT) -> list:
-    return list(
-        dict(sorted((sum([count for count in value.values()]), word) for (word, value) in key_dict.items())[
-             -limit:]).values())
-
-
-def _stdout_result():
-    for word, item in key_dict.items():
-        if word in _get_top_words():
-            continue
-        for doc_id, count in item.items():
-            print('%s\t%s' % (
-                str(word) + ',' + str(doc_id),
-                str(count) + ',' + str(len(list(doc_dict[doc_id])))
-            ))
-
-
-def _set_doc_dict():
-    for word, d in key_dict.items():
-        for doc_id, count in d.items():
-            if not doc_dict.get(doc_id):
-                doc_dict[doc_id] = {word: count}
-            else:
-                doc_dict[doc_id][word] = count
-    # _debug_str(str(doc_dict) + '\n', './output/debug.json')  # FIXME
-    # _debug_str(str(key_dict) + '\n')  # FIXME
+    return [
+        'в', 'и', 'на', 'с', 'по', 'не', 'из', 'что', 'к', 'от', 'года', 'для', 'как', 'а', 'о', 'был', 'за', 'году',
+        'его', 'до'
+    ][:limit]  # FIXME
+    # top_list = list(
+    #     dict(sorted((sum([count for count in value.values()]), word) for (word, value) in key_dict.items())[
+    #          -limit:]).values())
+    # return top_list
 
 
 def _debug_str(string: str, out: str = './output/debug.txt'):
@@ -68,27 +40,33 @@ def _debug_str(string: str, out: str = './output/debug.txt'):
 
 
 revision = False
+contributor = False
 text = False
 page_id = None
-key_list = []
-key_dict = {}  # {word: {doc_id: count}}
-doc_dict = {}  # {doc_id: {word: count}}
 for line in sys.stdin:
-    if 'revision' in re.findall(re_open_tag, line):
+    if not revision and 'revision' in re.findall(re_open_tag, line):
         revision = True
         continue
 
-    if 'revision' in re.findall(re_close_tag, line):
+    if revision and 'revision' in re.findall(re_close_tag, line):
         revision = False
         continue
 
     if not revision:
         continue
 
+    if not contributor and 'contributor' in re.findall(re_open_tag, line):
+        contributor = True
+        continue
+
+    if contributor and 'contributor' in re.findall(re_close_tag, line):
+        contributor = False
+        continue
+
     skip_tag = False
     for m in re.finditer(re_short_tag, line):
         tag = m.group('tag')
-        if tag == 'id':
+        if tag == 'id' and not contributor:
             page_id = m.group('payload')
             skip_tag = True
             continue
@@ -99,11 +77,11 @@ for line in sys.stdin:
     if skip_tag:
         continue
 
-    if 'text' in re.findall(re_open_tag, line):
+    if not text and 'text' in re.findall(re_open_tag, line):
         text = True
         continue
 
-    if 'text' in re.findall(re_close_tag, line):
+    if text and 'text' in re.findall(re_close_tag, line):
         text = False
         page_id = None
         continue
@@ -116,6 +94,3 @@ for line in sys.stdin:
         continue
     for content in line_contents:
         _iterate_line_contents(content, page_id)
-
-_set_doc_dict()
-_stdout_result()
