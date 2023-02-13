@@ -3,11 +3,11 @@ import sys
 from math import log
 
 
-def _stdout_result():
-    for _word, item in tf_dict.items():
-        for _doc_id, tf_idf in item.items():
-            # print('%s\t%s' % (str(_word) + ',' + str(_doc_id), tf_idf))
-            print('%s\t%.12f' % (str(_word) + ',' + str(_doc_id), tf_idf))
+# def _stdout_result():
+#     for _word, item in tf_dict.items():
+#         for _doc_id, tf_idf in item.items():
+#             # print('%s\t%s' % (str(_word) + ',' + str(_doc_id), tf_idf))
+#             print('%s\t%.12f' % (str(_word) + ',' + str(_doc_id), tf_idf))
 
 
 def _set_tf_dict():
@@ -22,10 +22,11 @@ def _set_tf_dict():
             # result += f'log({doc_count}/{len(key_dict[_word].keys())})={idf},'
             # result += f'{tf}*{idf}={tf_idf}'
             # _debug_str(result + '\n')  # FIXME
-            if not tf_dict.get(_word):
-                tf_dict[_word] = {_doc_id: tf_idf}
-            else:
-                tf_dict[_word][_doc_id] = tf_idf
+            print('%s\t%.12f' % (str(_word) + ',' + str(_doc_id), tf_idf))
+            # if not tf_dict.get(_word):
+            #     tf_dict[_word] = {_doc_id: tf_idf}
+            # else:
+            #     tf_dict[_word][_doc_id] = tf_idf
 
 
 def _debug_str(string: str, out: str = './output/debug.txt'):
@@ -34,7 +35,7 @@ def _debug_str(string: str, out: str = './output/debug.txt'):
 
 
 key_dict = {}  # {word: {doc_id: count}}
-tf_dict = {}
+# tf_dict = {}
 
 for line in sys.stdin:
     (word, value) = line.rstrip().split('\t', 1)
@@ -51,4 +52,4 @@ for line in sys.stdin:
         else:
             key_dict[word][doc_id] += count
 _set_tf_dict()
-_stdout_result()
+# _stdout_result()

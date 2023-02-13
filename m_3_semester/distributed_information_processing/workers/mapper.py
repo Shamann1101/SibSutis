@@ -15,7 +15,7 @@ def _str_cleanup(string: str) -> str:
 
 def _iterate_line_contents(_word: str, _doc_name: str):
     word = _str_cleanup(_word)
-    if word == '':
+    if word == '' or word in _get_top_words():
         return
     print('%s\t%s' % (
         word,
