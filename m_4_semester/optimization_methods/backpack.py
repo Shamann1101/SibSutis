@@ -25,7 +25,7 @@ class Item:
         return self.title or str(self._weight)
 
     def __repr__(self):
-        return "{} price: ({})".format(self.title or self._weight, self._price)
+        return "Item {} price: {}".format(self.title or self._weight, self._price)
 
 
 class Backpack:
@@ -84,6 +84,14 @@ class Backpack:
     def free_space(self) -> int:
         return self._weight_limit - sum([i.weight * c for i, c in self._kit.items()])
 
+    @property
+    def parent_list(self) -> list:
+        if self._parent is None:
+            return []
+        pl = [self._parent]
+        pl.extend(self._parent.parent_list)
+        return pl
+
     def _init_kit(self, kit: dict):
         for item, count in kit.items():
             if type(item) != Item:
@@ -107,7 +115,7 @@ class Backpack:
     def fill(self, s: Stock):
         bacpack_dict = {}
 
-        for item in s.stock:
+        for item in s.stock.copy():
             if self._weight_limit < item.weight:
                 continue
 
@@ -116,6 +124,9 @@ class Backpack:
             except ValueError as e:
                 continue
             bp_wo_item.fill(s)
+
+            if not s.can_get_item(item):
+                continue
 
             bpp = Backpack(self._weight_limit)
             bpp.parent = bp_wo_item
@@ -164,6 +175,9 @@ class Stock:
 
         return item
 
+    def can_get_item(self, item: Item) -> bool:
+        return True if self._stock.get(item) else False
+
 
 def _main():
     first = Item(price=8, weight=3)
@@ -180,6 +194,7 @@ def _main():
     backpack.fill(stock)
     print('backpack', backpack, backpack.price)
     print('history', Backpack.history)
+    print('parent_list', backpack.parent_list)
 
 
 if __name__ == '__main__':
