@@ -8,7 +8,7 @@
   * ~~A~~ 4 [ladder.py](ladder.py)
   * ~~B~~ 4 [bunny.py](bunny.py)
   * C 4
-  * D 4
+  * ~~D~~ 4 [matrix.py](matrix.py)
   * E 4
 * ~~Дейкстра~~ 6+6 [dijkstra.py](dijkstra.py)
 * ~~Форд-Беллман~~ 6+6 [ford.py](ford.py)
