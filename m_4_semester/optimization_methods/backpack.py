@@ -31,20 +31,26 @@ class Item:
 class Backpack:
     _history = {}
 
-    def __init__(self, weight_limit: int, *args):
+    def __init__(self, weight_limit: int, stock: Stock, *args):
         if weight_limit < 0:
             raise ValueError('Weight limit must be positive int')
         self._weight_limit = weight_limit
+        self._stock = stock
 
         bp = self.get_from_history_by_weight(weight_limit)
         if bp:
             self._kit = bp.kit.copy()
-            self._parent = copy.deepcopy(bp.parent)
+            self._parent = bp.parent
         else:
             self._kit = {}  # {Item: int}
             self._parent = None
             if args and type(args[0]) == Backpack:
-                self.parent = copy.deepcopy(args[0])
+                self.parent = args[0]
+
+    # def __del__(self):
+    #     for item, count in self._kit.items():
+    #         self._stock.add_item(item, count)
+    #         print(f'Put item back {item}')
 
     def __str__(self):
         return str(self._weight_limit) + str(self._kit)
@@ -65,7 +71,7 @@ class Backpack:
     def parent(self, parent: Backpack):
         if self._weight_limit <= parent.weight_limit:
             raise ValueError('Parent\'s weight limit must be smaller than child\'s')
-        self._parent = copy.deepcopy(parent)
+        self._parent = parent
         self._kit = self._parent.kit.copy()
 
     @property
@@ -112,23 +118,23 @@ class Backpack:
         else:
             self._kit[item] += 1
 
-    def fill(self, s: Stock):
+    def fill(self):
         bacpack_dict = {}
 
-        for item in s.stock.copy():
+        for item in self._stock.stock.copy():
             if self._weight_limit < item.weight:
                 continue
 
             try:
-                bp_wo_item = Backpack(self._weight_limit - item.weight)
+                bp_wo_item = Backpack(self._weight_limit - item.weight, self._stock)
             except ValueError as e:
                 continue
-            bp_wo_item.fill(s)
+            bp_wo_item.fill()
 
-            if not s.can_get_item(item):
+            if not self._stock.can_get_item(item):
                 continue
 
-            bpp = Backpack(self._weight_limit)
+            bpp = Backpack(self._weight_limit, self._stock)
             bpp.parent = bp_wo_item
             bpp.add_item(item)
             bacpack_dict[bpp] = item
@@ -136,7 +142,7 @@ class Backpack:
         if len(bacpack_dict) > 0:
             m = max(bacpack_dict.keys(), key=operator.attrgetter('price'))
             self.parent = m.parent
-            self.add_item(s.pop_item(bacpack_dict[m]))
+            self.add_item(self._stock.pop_item(bacpack_dict[m]))
 
         self._history[self.weight_limit] = self
 
@@ -190,8 +196,8 @@ def _main():
     stock.add_item(third)
     print('stock', stock)
 
-    backpack = Backpack(9)
-    backpack.fill(stock)
+    backpack = Backpack(13, stock)
+    backpack.fill()
     print('backpack', backpack, backpack.price)
     print('history', Backpack.history)
     print('parent_list', backpack.parent_list)
