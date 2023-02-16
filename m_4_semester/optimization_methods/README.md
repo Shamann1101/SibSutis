@@ -14,7 +14,7 @@
 * ~~Форд-Беллман~~ 6+6 [ford.py](ford.py)
 * ~~Краскалл~~ 8 [kruskal.py](kruskal.py)
 * ~~Фдойд~~ 2 [floyd.py](floyd.py)
-* BFS 10
+* ~~BFS~~ 10 [bfs.py](bfs.py)
 * ~~Дейкстра быстрый~~ 16 [dijkstra_heap.py](dijkstra_heap.py)
 
 Критерии:
