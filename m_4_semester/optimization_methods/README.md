@@ -2,7 +2,7 @@
 
 * ~~Рюкзак бесконечный~~ - 8 [backpack.py](backpack.py)
 * ~~Рюкзак конечный~~ 12 [backpack.py](backpack.py)
-* Скобки 12
+* ~~Скобки~~ 12 [parentheses.py](parentheses.py)
 * Лягушка 16
 * Динамика с https://codeforces.com/gym/100135
   * ~~A~~ 4 [ladder.py](ladder.py)
