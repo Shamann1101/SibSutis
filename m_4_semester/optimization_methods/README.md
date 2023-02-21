@@ -6,7 +6,7 @@
 * ~~Лягушка~~ 16 [frog.py](frog.py)
 * Динамика с https://codeforces.com/gym/100135
   * ~~A~~ 4 [ladder.py](ladder.py)
-  * ~~B~~ 4 [bunny.py](bunny.py)
+  * ~~B~~ 4 [lepus.py](lepus.py)
   * C 4
   * ~~D~~ 4 [matrix.py](matrix.py)
   * E 4

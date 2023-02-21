@@ -28,9 +28,23 @@ def bunny(_in: list) -> int:
     return _list[-1]
 
 
+def _get_list(filename: str = 'lepus.in') -> list:
+    with open(filename, 'r') as f:
+        count = int(f.readline())
+        if 2 < count > 1000:
+            raise ValueError
+        return [v.strip() for v in f.readline()][:count]
+
+
+def _save_result(value: int, filename: str = 'lepus.out'):
+    with open(filename, 'w') as f:
+        f.write(str(value))
+
+
 def main():
-    _in = ['.', '.', '.', CONST_SWAMP, CONST_FEED, CONST_FEED, CONST_SWAMP, '.']
-    print(bunny(_in))
+    _in = _get_list()
+    result = bunny(_in)
+    _save_result(result)
 
 
 if __name__ == '__main__':
