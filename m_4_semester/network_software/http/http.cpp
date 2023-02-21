@@ -29,7 +29,7 @@ struct client_session {
 int server;
 
 /* List of client connections and their associated threads */
-vector<client_session*> sessions;
+vector<client_session *> sessions;
 pthread_mutex_t sessions_mutex;
 
 /* Reads a line from a TCP socket */
@@ -37,12 +37,12 @@ string recv_line(int sock) {
     char c;
     string buf;
     for (
-        size_t i = 0;
-        buf.size() >= 2 ?
-        buf.compare(buf.size() - 2, 2, "\r\n") :
-        1;
-        i++
-    ) {
+            size_t i = 0;
+            buf.size() >= 2 ?
+            buf.compare(buf.size() - 2, 2, "\r\n") :
+            1;
+            i++
+            ) {
         if (recv(sock, &c, 1, 0) < 1) break;
         buf.push_back(c);
     }
@@ -50,7 +50,7 @@ string recv_line(int sock) {
 }
 
 /* Sends a string through a TCP socket */
-ssize_t send_line(int sock, const char* str) {
+ssize_t send_line(int sock, const char *str) {
     size_t len = strlen(str);
     return send(sock, str, len, 0);
 }
@@ -87,7 +87,7 @@ void shutdown_webserver(int) {
 }
 
 /* Unescape URL */
-string unescape_pathname(const char* path) {
+string unescape_pathname(const char *path) {
     char c;
     string s;
     for (size_t i = 0; path[i]; i++) {
@@ -102,11 +102,11 @@ string unescape_pathname(const char* path) {
 }
 
 /* Handles HTTP connection */
-void* handle_connection(void* arg) {
+void *handle_connection(void *arg) {
     char ip[64];
     char response[512];
-    FILE* p;
-    client_session *cs = (client_session*)arg;
+    FILE *p;
+    client_session *cs = (client_session *) arg;
     int sock = cs->sock;
     string header, file, mimetype(64, 0), dir;
 
@@ -116,12 +116,12 @@ void* handle_connection(void* arg) {
     } while (header.compare(header.size() - 4, 4, "\r\n\r\n"));
 
     /* Unescape URL path */
-    if (header.compare(0, 4, "GET ") == 0 || header.compare(0, 5, "HEAD ") == 0) 
+    if (header.compare(0, 4, "GET ") == 0 || header.compare(0, 5, "HEAD ") == 0)
         file = unescape_pathname(
-            header.substr(
-                header.find(' ') + 2,
-                header.find(' ', header.find(' ') + 1) - (header.find(' ') + 2)
-            ).c_str()
+                header.substr(
+                        header.find(' ') + 2,
+                        header.find(' ', header.find(' ') + 1) - (header.find(' ') + 2)
+                ).c_str()
         );
 
     struct stat st;
@@ -133,12 +133,12 @@ void* handle_connection(void* arg) {
         send_line(sock, "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n");
         goto handle_connection_done;
 
-    /* Forbidden */
+        /* Forbidden */
     } else if (access(file.c_str(), R_OK) == -1) {
         send_line(sock, "HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\n\r\n");
         goto handle_connection_done;
 
-    /* Check for index.html if directory */
+        /* Check for index.html if directory */
     } else if (S_ISDIR(st.st_mode)) {
         dir = file;
         file = string(dirname(&dir[0])).append("/index.html");
@@ -156,17 +156,17 @@ void* handle_connection(void* arg) {
     mimetype.erase(mimetype.find('\n'), 1);
 
     /* Send response header */
-    sprintf(response, 
-        "HTTP/1.1 200 OK\r\n"
-        "Content-Length: %lu\r\n"
-        "Content-Type: %s\r\n\r\n",
-        st.st_size, mimetype.c_str()
+    sprintf(response,
+            "HTTP/1.1 200 OK\r\n"
+            "Content-Length: %lu\r\n"
+            "Content-Type: %s\r\n\r\n",
+            st.st_size, mimetype.c_str()
     );
     send_line(sock, response);
 
     /* Send file contents */
     if (header.compare(0, 4, "GET ") == 0) {
-        FILE* f = fopen(file.c_str(), "r");
+        FILE *f = fopen(file.c_str(), "r");
         setbuffer(f, response, 512);
         int c;
         char ch;
@@ -179,18 +179,18 @@ void* handle_connection(void* arg) {
         fclose(f);
     }
 
-handle_connection_done:
+    handle_connection_done:
     close_connection(sock);
     delete cs;
     return 0;
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     if (argc != 3) {
         cout <<
-            "Webserver\n"
-            "Usage: " << argv[0] << " PORT DIRECTORY\n"
-            "Use CTRL-C to shutdown webserver.\n";
+             "Webserver\n"
+             "Usage: " << argv[0] << " PORT DIRECTORY\n"
+                                     "Use CTRL-C to shutdown webserver.\n";
         return 1;
     }
 
