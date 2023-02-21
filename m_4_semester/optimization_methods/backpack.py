@@ -27,6 +27,12 @@ class Item:
     def __repr__(self):
         return "Item {} price: {}".format(self.title or self._weight, self._price)
 
+    def __eq__(self, other):
+        return (self._price, self._weight, self.title) == (other.price, other.weight, other.title)
+
+    def __hash__(self):
+        return hash((self._price, self._weight, self.title))
+
 
 class Backpack:
     _history = {}
@@ -41,6 +47,7 @@ class Backpack:
         if bp:
             self._kit = bp.kit.copy()
             self._parent = bp.parent
+            self._stock = copy.deepcopy(bp.stock)
         else:
             self._kit = {}  # {Item: int}
             self._parent = None
@@ -56,7 +63,7 @@ class Backpack:
         return str(self._weight_limit) + str(self._kit)
 
     def __repr__(self):
-        return "price: " + str(self.price) + "\tkit: " + str(self._kit) + "\n"
+        return "price: " + str(self.price) + "\tkit: " + str(self._kit) + "\tstock: " + str(self._stock) + "\n"
 
     @classmethod
     @property
@@ -98,6 +105,10 @@ class Backpack:
         pl.extend(self._parent.parent_list)
         return pl
 
+    @property
+    def stock(self) -> Stock:
+        return self._stock
+
     def _init_kit(self, kit: dict):
         for item, count in kit.items():
             if type(item) != Item:
@@ -106,8 +117,7 @@ class Backpack:
 
     @classmethod
     def get_from_history_by_weight(cls, weight: int) -> Backpack | None:
-        backpack_list = [bp for bp in cls._history.values() if bp.weight_limit == weight]
-        return backpack_list[0] if len(backpack_list) > 0 else None
+        return cls._history.get(weight)
 
     def add_item(self, item: Item):
         if item.weight > self.free_space:
@@ -118,33 +128,37 @@ class Backpack:
         else:
             self._kit[item] += 1
 
+    @classmethod
+    def fill_history(cls, weight_limit: int, _stock: Stock):
+        bacpack_list = []
+
+        stock = copy.deepcopy(_stock)
+        for i in range(weight_limit + 1):
+            for item in stock.stock.copy():
+                if i < item.weight:
+                    continue
+
+                try:
+                    bp_wo_item = Backpack(i - item.weight, copy.deepcopy(stock))
+                except ValueError:
+                    continue
+
+                bpp = Backpack(i, bp_wo_item.stock)
+                bpp.parent = bp_wo_item
+                if bpp.stock.can_get_item(item):
+                    bpp.add_item(bpp.stock.pop_item(item))
+                    bacpack_list.append(bpp)
+
+            if len(bacpack_list) > 0:
+                bp = max(bacpack_list, key=operator.attrgetter('price'))
+            else:
+                bp = Backpack(i, stock)
+
+            cls._history[i] = bp
+            stock = copy.deepcopy(bp.stock)
+
     def fill(self):
-        bacpack_dict = {}
-
-        for item in self._stock.stock.copy():
-            if self._weight_limit < item.weight:
-                continue
-
-            try:
-                bp_wo_item = Backpack(self._weight_limit - item.weight, self._stock)
-            except ValueError as e:
-                continue
-            bp_wo_item.fill()
-
-            if not self._stock.can_get_item(item):
-                continue
-
-            bpp = Backpack(self._weight_limit, self._stock)
-            bpp.parent = bp_wo_item
-            bpp.add_item(item)
-            bacpack_dict[bpp] = item
-
-        if len(bacpack_dict) > 0:
-            m = max(bacpack_dict.keys(), key=operator.attrgetter('price'))
-            self.parent = m.parent
-            self.add_item(self._stock.pop_item(bacpack_dict[m]))
-
-        self._history[self.weight_limit] = self
+        self.fill_history(self._weight_limit, self._stock)
 
 
 class Stock:
@@ -191,13 +205,15 @@ def _main():
     third = Item(price=23, weight=8)
 
     stock = Stock()
-    stock.add_item(first)
-    stock.add_item(second)
-    stock.add_item(third)
+    stock.add_item(first, 3)
+    stock.add_item(second, 2)
+    stock.add_item(third, 1)
     print('stock', stock)
 
-    backpack = Backpack(13, stock)
-    backpack.fill()
+    weight_limit = 13
+    Backpack.fill_history(weight_limit, stock)
+    backpack = Backpack(weight_limit, stock)
+    # backpack.fill()
     print('backpack', backpack, backpack.price)
     print('history', Backpack.history)
     print('parent_list', backpack.parent_list)
