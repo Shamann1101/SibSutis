@@ -1,3 +1,5 @@
+from math import inf
+
 CONST_SWAMP = 'w'
 CONST_FEED = '"'
 
@@ -13,6 +15,7 @@ def bunny(_in: list) -> int:
 
     for i in range(1, len(_list), 1):
         if _in[i] == CONST_SWAMP:
+            _list[i] = -inf
             continue
 
         if i < 2:
@@ -25,7 +28,7 @@ def bunny(_in: list) -> int:
         if _in[i] == CONST_FEED:
             _list[i] += 1
 
-    return _list[-1]
+    return _list[-1] if _list[-1] >= -1 else -1
 
 
 def _get_list(filename: str = 'lepus.in') -> list:
