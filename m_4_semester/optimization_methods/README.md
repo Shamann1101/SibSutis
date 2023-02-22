@@ -11,7 +11,7 @@
   * D 4 [matrix.py](matrix.py)
   * E 4
 * _Дейкстра_ 6+6 [dijkstra.py](dijkstra.py)
-* Форд-Беллман 6+6 [ford.py](ford.py)
+* _Форд-Беллман_ 6+6 [ford.py](ford.py)
 * Краскалл 8 [kruskal.py](kruskal.py)
 * ~~Флойд~~ 2 [floyd.py](floyd.py)
 * BFS 10 [bfs.py](bfs.py)

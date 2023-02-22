@@ -4,17 +4,17 @@ from math import inf
 from graph import Graph
 
 
-def ford(vertex_list, target_id):
+def ford(vertex_list: list, source_id: int) -> list:
     """
     Sets vertex weights based on Ford's algorithm
     :param vertex_list: array of Graph objects
-    :param target_id: source id
+    :param source_id: source id
     :return:
     """
     message = ""
     weight_list = [list() for _ in range(len(vertex_list))]
     weight_list_result = [inf] * len(vertex_list)
-    weight_list_result[target_id] = 0
+    weight_list_result[source_id] = 0
 
     stabilization = False
     iteration = 0
@@ -26,7 +26,7 @@ def ford(vertex_list, target_id):
         calculated_weight = weight_list_result.copy()
 
         for vertex in vertex_list:
-            if int(vertex.title) == target_id:
+            if int(vertex.title) == source_id:
                 continue
             weight_list[iteration][int(vertex.title)] = [inf] * len(vertex_list)
 
@@ -44,12 +44,16 @@ def ford(vertex_list, target_id):
 
         if calculated_weight == weight_list_result:
             stabilization = True
+            for v in vertex_list:
+                v.calculated_weight = calculated_weight[v.title]
+                v.set_visited()
         else:
             weight_list_result = calculated_weight
             iteration += 1
 
     for string in weight_list:
-        message += str(string) + "\n"
+        # message += str(string) + "\n"
+        message += str([min(v) if len(v) > 0 else 0 for v in string]) + "\n"
 
     if args.print:
         print(message)
@@ -77,13 +81,20 @@ def main():
                                  vertex_list[3].title: 3}
 
     source_vertex = int(args.source) if args.source and 0 <= args.source < Graph.object_count else 0
+    target_vertex = int(args.target) if args.target and 0 <= args.target < Graph.object_count else 4
 
     print(ford(vertex_list, source_vertex))
+
+    if args.target:
+        path = Graph.find_path(vertex_list, source_vertex, target_vertex, True if args.print else False)
+        path.reverse()
+        print(path)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Ford’s algorithm')
     parser.add_argument('source', type=int, nargs='?', help='Source vertex')
+    parser.add_argument('target', type=int, nargs='?', help='Target vertex')
     parser.add_argument('--print', action='store_true', help='Print log')
     args = parser.parse_args()
 
