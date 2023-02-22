@@ -58,103 +58,35 @@ def dijkstra(vertex_list: list, target_id: int):
             print(nearest_graph, "set_visited\n")
 
 
-def find_path(vertex_list: list, source_id: int, target_id: int, path: list = []) -> list:
-    msg = ""
-    try:
-        if Graph.object_visited < Graph.object_count:
-            msg = "Need to execute `dijkstra` first"
-            print(Graph.object_visited, Graph.object_count)
-            raise RuntimeError
-        if source_id < 0 or source_id > Graph.object_count:
-            msg = "source_id is out os scope"
-            raise ValueError()
-        if target_id < 0 or target_id > Graph.object_count:
-            msg = "target_id is out os scope"
-            raise ValueError()
-    except ValueError:
-        print(msg)
-        exit(1)
-    except RuntimeError:
-        print(msg)
-        exit(1)
-
-    if args.print:
-        print("=== Path finding ===")
-    if len(path) == 0:
-        path.append(target_id)
-    intended_vertex = vertex_list[target_id].neighbours.copy()
-    for neighbour in vertex_list[target_id].neighbours:
-        if vertex_list[neighbour].calculated_weight != vertex_list[target_id].calculated_weight - \
-                vertex_list[target_id].neighbours[neighbour]:
-            intended_vertex.pop(neighbour)
-    if args.print:
-        print(intended_vertex)
-    if len(intended_vertex) == 1:
-        vertex = intended_vertex.popitem()
-        path.append(vertex[0])
-        return find_path(vertex_list, source_id, vertex[0], path)
-    elif len(intended_vertex) > 1:
-        new_path = []
-        for vertex in intended_vertex:
-            branch = list()
-            branch.append(vertex)
-            find_path(vertex_list, source_id, vertex, branch)
-            new_path.append(branch)
-        path.extend(new_path)
-    return path
-
-
 def main():
-    # vertex_list = []
-    # for i in range(6):
-    #     vertex_list.append(Graph(i))
-    # vertex_list[0].neighbours = {vertex_list[1].title: 7,
-    #                              vertex_list[2].title: 9,
-    #                              vertex_list[5].title: 14}
-    # vertex_list[1].neighbours = {vertex_list[0].title: 7,
-    #                              vertex_list[2].title: 10,
-    #                              vertex_list[3].title: 15}
-    # vertex_list[2].neighbours = {vertex_list[0].title: 9,
-    #                              vertex_list[1].title: 10,
-    #                              vertex_list[3].title: 11,
-    #                              vertex_list[5].title: 2}
-    # vertex_list[3].neighbours = {vertex_list[1].title: 15,
-    #                              vertex_list[2].title: 11,
-    #                              vertex_list[4].title: 6}
-    # vertex_list[4].neighbours = {vertex_list[3].title: 6,
-    #                              vertex_list[5].title: 9}
-    # vertex_list[5].neighbours = {vertex_list[0].title: 14,
-    #                              vertex_list[2].title: 2,
-    #                              vertex_list[4].title: 9}
-
-    v2 = []
+    vertex_list = []
     for i in range(5):
-        v2.append(Graph(i))
-    v2[0].neighbours = {v2[1].title: 25,
-                        v2[2].title: 15,
-                        v2[3].title: 7,
-                        v2[4].title: 2}
-    v2[1].neighbours = {v2[0].title: 25,
-                        v2[2].title: 8}
-    v2[2].neighbours = {v2[0].title: 15,
-                        v2[1].title: 8,
-                        v2[3].title: 4}
-    v2[3].neighbours = {v2[0].title: 7,
-                        v2[2].title: 4,
-                        v2[4].title: 3}
-    v2[4].neighbours = {v2[0].title: 2,
-                        v2[3].title: 3}
+        vertex_list.append(Graph(i))
+    vertex_list[0].neighbours = {vertex_list[1].title: 25,
+                                 vertex_list[2].title: 15,
+                                 vertex_list[3].title: 7,
+                                 vertex_list[4].title: 2}
+    vertex_list[1].neighbours = {vertex_list[0].title: 25,
+                                 vertex_list[2].title: 8}
+    vertex_list[2].neighbours = {vertex_list[0].title: 15,
+                                 vertex_list[1].title: 8,
+                                 vertex_list[3].title: 4}
+    vertex_list[3].neighbours = {vertex_list[0].title: 7,
+                                 vertex_list[2].title: 4,
+                                 vertex_list[4].title: 3}
+    vertex_list[4].neighbours = {vertex_list[0].title: 2,
+                                 vertex_list[3].title: 3}
 
     source_vertex = int(args.source) if args.source and 0 <= args.source < Graph.object_count else 0
     target_vertex = int(args.target) if args.target and 0 <= args.target < Graph.object_count else 4
 
-    dijkstra(v2, source_vertex)
+    dijkstra(vertex_list, source_vertex)
 
-    for vertex in v2:
+    for vertex in vertex_list:
         print(vertex, "weight:", vertex.calculated_weight)
 
     if args.target:
-        path = find_path(v2, source_vertex, target_vertex)
+        path = Graph.find_path(vertex_list, source_vertex, target_vertex, True if args.print else False)
         path.reverse()
         print("Path:", path)
 
