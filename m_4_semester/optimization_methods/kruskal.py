@@ -1,7 +1,7 @@
 from graph import Graph
 
 
-def get_edge_dict(vertex_list):
+def get_edge_sorted(vertex_list: list) -> tuple:
     edge_dict = dict()
     for vertex in vertex_list:
         for neighbour in vertex.neighbours:
@@ -18,7 +18,7 @@ def get_edge_dict(vertex_list):
     return edge_dict_sorted, edge_list_sorted
 
 
-def kruskal(vertex_list, edge_list_sorted):
+def kruskal(vertex_list: list, edge_list_sorted: list) -> list:
     new_vertex_list = []
     connections = []
     for i in range(len(vertex_list)):
@@ -79,36 +79,26 @@ def kruskal(vertex_list, edge_list_sorted):
 
 def main():
     vertex_list = []
-    for i in range(7):
+    for i in range(5):
         vertex_list.append(Graph(i))
-    vertex_list[0].neighbours = {vertex_list[1].title: 20,
-                                 vertex_list[5].title: 23,
-                                 vertex_list[6].title: 1}
-    vertex_list[1].neighbours = {vertex_list[0].title: 20,
-                                 vertex_list[2].title: 5,
-                                 vertex_list[6].title: 4}
-    vertex_list[2].neighbours = {vertex_list[1].title: 5,
-                                 vertex_list[3].title: 3,
-                                 vertex_list[6].title: 9}
-    vertex_list[3].neighbours = {vertex_list[2].title: 3,
-                                 vertex_list[4].title: 17,
-                                 vertex_list[6].title: 16}
-    vertex_list[4].neighbours = {vertex_list[3].title: 17,
-                                 vertex_list[5].title: 28,
-                                 vertex_list[6].title: 25}
-    vertex_list[5].neighbours = {vertex_list[0].title: 23,
-                                 vertex_list[4].title: 28,
-                                 vertex_list[6].title: 36}
-    vertex_list[6].neighbours = {vertex_list[0].title: 1,
-                                 vertex_list[1].title: 4,
-                                 vertex_list[2].title: 9,
-                                 vertex_list[3].title: 16,
-                                 vertex_list[4].title: 25,
-                                 vertex_list[5].title: 36}
+    vertex_list[0].neighbours = {vertex_list[1].title: 25,
+                                 vertex_list[2].title: 15,
+                                 vertex_list[3].title: 7,
+                                 vertex_list[4].title: 2}
+    vertex_list[1].neighbours = {vertex_list[0].title: 25,
+                                 vertex_list[2].title: 8}
+    vertex_list[2].neighbours = {vertex_list[0].title: 15,
+                                 vertex_list[1].title: 8,
+                                 vertex_list[3].title: 4}
+    vertex_list[3].neighbours = {vertex_list[0].title: 7,
+                                 vertex_list[2].title: 4,
+                                 vertex_list[4].title: 3}
+    vertex_list[4].neighbours = {vertex_list[0].title: 2,
+                                 vertex_list[3].title: 3}
 
-    _, edge_list = get_edge_dict(vertex_list)
+    _, edge_list = get_edge_sorted(vertex_list)
     # print(edge_dict)
-    # print(edge_list)
+    print('edge_list', edge_list)
     print(kruskal(vertex_list, edge_list))
 
 
